@@ -5,7 +5,6 @@ ENV TOKEN=${TOKEN}
 
 COPY . .
 
-RUN apt update && apt install -y ffmpeg
-RUN pip install nextcord pynacl yt-dlp
+RUN pip install discord pynacl yt-dlp wavelink
 
 ENTRYPOINT ["python", "main.py"]

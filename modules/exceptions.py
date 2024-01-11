@@ -4,3 +4,6 @@ class VoiceError(Exception):
 
 class YTDLError(Exception):
     pass
+
+class WavelinkError(Exception):
+    pass
