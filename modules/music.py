@@ -282,7 +282,7 @@ class Music(commands.Cog):
     @commands.command(name='loop')
     async def loop(self, ctx: commands.Context, loop_mode: str) -> None:
         """
-        Changes the player's loop mode. Use p!help autoplay to see modes.
+        Changes the player's loop mode. Use p!help loop to see modes.
 
         Parameters:
         loop_mode: A string representing the loop mode. Valid modes: 'normal', 'loop', 'loop_all'
