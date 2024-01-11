@@ -1,11 +1,13 @@
 FROM python:3.10.13-slim
 
 ARG TOKEN
+ARG LAVALINK_SERVER_PASSWORD
+
 ENV TOKEN=${TOKEN}
+ENV LAVALINK_SERVER_PASSWORD=${LAVALINK_SERVER_PASSWORD}
 
 COPY . .
 
-RUN apt update && apt install -y ffmpeg
-RUN pip install nextcord pynacl yt-dlp
+RUN pip install discord wavelink
 
 ENTRYPOINT ["python", "main.py"]
