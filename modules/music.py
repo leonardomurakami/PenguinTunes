@@ -5,7 +5,7 @@ import wavelink
 
 from discord.ext import commands
 
-from modules.globals import QUEUE_DECORATORS, GREEN_CHECKMARK_EMOJI, RED_CROSS_EMOJI
+from modules.globals import BOT_PREFIX, QUEUE_DECORATORS, GREEN_CHECKMARK_EMOJI, RED_CROSS_EMOJI
 from utils import create_track_embed, milliseconds_to_mm_ss
 
 
@@ -15,6 +15,9 @@ class Music(commands.Cog):
 
     @commands.command(name='stop')
     async def stop(self, ctx: commands.Context):
+        """
+        Stops the music playback and clears the queue.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -27,6 +30,9 @@ class Music(commands.Cog):
 
     @commands.command(name='shuffle')
     async def shuffle(self, ctx: commands.Context):
+        """
+        Shuffles the music queue.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -40,8 +46,11 @@ class Music(commands.Cog):
     @commands.command(name='play', alias=['mp'])
     async def play(self, ctx: commands.Context, *, query: str) -> None:
         """
-        Play a song with the given query.
-            Start a query with "music:" to search youtube music
+        Plays a song based on the given query. The query can be a URL or a search term. 
+        Prefix query with 'music:' for YouTube music searches.
+        
+        Parameters:
+        query: A string representing the search query or URL for the track.
         """
         if not ctx.guild:
             return
@@ -88,7 +97,9 @@ class Music(commands.Cog):
     
     @commands.command(name='skip')
     async def skip(self, ctx: commands.Context) -> None:
-        """Skip the current song."""
+        """
+        Skips the current song in the queue.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -103,6 +114,9 @@ class Music(commands.Cog):
         
     @commands.command(name='pause', aliases=['resume', 'unpause', 'despause'])
     async def pause(self, ctx: commands.Context):
+        """
+        Toggles playback pause/resume.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -117,7 +131,9 @@ class Music(commands.Cog):
 
     @commands.command(name='leave')
     async def leave(self, ctx: commands.Context) -> None:
-        """Disconnect the Player."""
+        """
+        Disconnects the player from the voice channel.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -129,7 +145,9 @@ class Music(commands.Cog):
 
     @commands.command(name='nightcore')
     async def nightcore(self, ctx: commands.Context) -> None:
-        """Set the filter to a nightcore style."""
+        """
+        Sets the music filter to a nightcore style.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -143,7 +161,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def normal(self, ctx: commands.Context) -> None:
-        """Set the filter to a normal style, ditching all filters."""
+        """
+        Resets the music filter to normal, removing any active filters.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -159,7 +179,9 @@ class Music(commands.Cog):
 
     @commands.command(name='queue')
     async def queue(self, ctx: commands.Context) -> None:
-        """Display the players current queue"""
+        """
+        Displays the current music queue.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -189,7 +211,9 @@ class Music(commands.Cog):
 
     @commands.command(name='np')
     async def nowplaying(self, ctx: commands.Context) -> None:
-        """Display the players current song"""
+        """
+        Shows information about the currently playing song.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -198,24 +222,32 @@ class Music(commands.Cog):
         
         track = player.current
         embed = create_track_embed(track, None)
+        embed.remove_field(0)
+        embed.add_field(name = 'Current', value=f"{milliseconds_to_mm_ss(player.position)}/{milliseconds_to_mm_ss(track.length)}")
         await player.home.send(embed=embed)
         
     @commands.command(name='autoplay')
     async def autoplay(self, ctx: commands.Context, *, autoplay_mode: str) -> None:
-        """
-        Sets the autoplay mode for the bot
-        # enabled = AutoPlay will play songs for us and fetch recommendations...
-        # partial = AutoPlay will play songs for us, but WILL NOT fetch recommendations...
-        # disabled = AutoPlay will do nothing...
+        f"""
+        Sets the autoplay mode for the bot. Use {BOT_PREFIX}help autoplay to see modes.
+        
+        Parameters:
+        autoplay_mode: A string representing the autoplay mode. 'enabled', 'partial', 'disabled'.
         """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
             await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
             return
+        
+        autoplay_enum = {
+            "enabled": wavelink.AutoPlayMode.enabled,
+            "partial": wavelink.AutoPlayMode.partial,
+            "disabled": wavelink.AutoPlayMode.disabled,
+        }
         if autoplay_mode in ['enabled', 'partial', 'disabled']:
             await ctx.send(f"Autoplay mode changed from {player.autoplay} to {autoplay_mode}")
-            player.autoplay = autoplay_mode
+            player.autoplay = autoplay_enum[autoplay_mode]
             await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
         else:
             await ctx.send("Invalid mode passed. Valid modes are: {enabled, partial, disabled}")
@@ -223,13 +255,18 @@ class Music(commands.Cog):
 
     @commands.command(name='volume')
     async def volume(self, ctx: commands.Context, volume: int | float) -> None:
-        """Changes player volume."""
+        """
+        Changes the player's volume.
+
+        Parameters:
+        volume: An integer or float representing the new volume level.
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
             await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
             return
-
+        
         if volume > 0 and volume <= 0.2:
             volume = volume * 1000
         elif volume > 0.2 and volume <= 1:
@@ -238,21 +275,29 @@ class Music(commands.Cog):
             await ctx.send("Invalid volume passed. Value should be from 0 to 1 [Default is 0.1]")
             await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
             return
-
+        
         player.set_volume(volume)
         await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
 
     @commands.command(name='loop')
     async def loop(self, ctx: commands.Context, loop_mode: str) -> None:
-        """Changes player loop mode, avaliable modes are: {normal, loop, loop_all}."""
+        """
+        Changes the player's loop mode. Use {BOT_PREFIX}help autoplay to see modes.
+
+        Parameters:
+        loop_mode: A string representing the loop mode. Valid modes: 'normal', 'loop', 'loop_all'
+        """
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
             await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
             return
 
-
-
+        loop_enum = {
+            "normal": wavelink.QueueMode.normal,
+            "loop": wavelink.QueueMode.loop,
+            "loop_all": wavelink.QueueMode.loop_all
+        }
         if loop_mode in ['normal', 'loop', 'loop_all']:
             if loop_mode == 'normal':
                 mode_explanation = "not loop either track or history"
@@ -260,7 +305,7 @@ class Music(commands.Cog):
                 mode_explanation = "continuously loop one track"
             else:
                 mode_explanation = "continuously loop through all tracks"
-            player.queue.mode = loop_mode
+            player.queue.mode = loop_enum[loop_mode]
             await ctx.send(f"The bot is now set to {mode_explanation}")
             await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
         else:
