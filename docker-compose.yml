@@ -1,10 +1,12 @@
 version: "3.8"
 services:
   piplup:
-    image: piplup:latest
-    build: .
-    environment:
-      - TOKEN=${DISCORD_TOKEN}
+    restart: unless-stopped
+    build:
+      context: .
+      args:
+        TOKEN: ${DISCORD_TOKEN}
+        LAVALINK_SERVER_PASSWORD: ${LAVALINK_SERVER_PASSWORD}
     depends_on: 
       - lavalink
     networks:

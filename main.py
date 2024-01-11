@@ -4,19 +4,22 @@ import discord
 import os
 import wavelink
 
-from modules.configs import BOT_PREFIX
+from modules.globals import BOT_PREFIX
 from discord.ext import commands
 from modules.music import Music
+from utils import create_track_embed, milliseconds_to_mm_ss
 
 class Bot(commands.Bot):
     def __init__(self) -> None:
         intents = discord.Intents.all()
+
         discord.utils.setup_logging()
+        
         super().__init__(command_prefix=BOT_PREFIX, intents=intents, description="Piplup")
 
     async def setup_hook(self) -> None:
         nodes = [
-            wavelink.Node(uri="http://localhost:2333", password=os.getenv("LAVALINK_SERVER_PASSWORD")),
+            wavelink.Node(uri="http://lavalink:2333", password=os.getenv("LAVALINK_SERVER_PASSWORD")),
         ]
         await wavelink.Pool.connect(nodes=nodes, client=self)
 
@@ -30,21 +33,21 @@ class Bot(commands.Bot):
         player: wavelink.Player | None = payload.player
         if not player:
             return
-        
         original: wavelink.Playable | None = payload.original
         track: wavelink.Playable = payload.track
-        embed: discord.Embed = discord.Embed(title="Now Playing")
-        embed.description = f"**{track.title}** by `{track.author}`"
-        if track.artwork:
-            embed.set_image(url=track.artwork)
-        if original and original.recommended:
-            embed.description += f"\n\n`This track was recommended via {track.source}`"
-        if track.album.name:
-            embed.add_field(name="Album", value=track.album.name)
+        embed=create_track_embed(track, original)
         await player.home.send(embed=embed)
 
+    async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload) -> None:
+        player: wavelink.Player | None = payload.player
+        if not player:
+            return
+        await player.play(player.queue.get())
+
+
+bot: Bot = Bot()
+
 async def main() -> None:
-    bot = Bot()
     async with bot:
         await bot.add_cog(Music(bot))
         await bot.start(os.getenv("TOKEN"))

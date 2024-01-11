@@ -1,10 +1,13 @@
 FROM python:3.10.13-slim
 
 ARG TOKEN
+ARG LAVALINK_SERVER_PASSWORD
+
 ENV TOKEN=${TOKEN}
+ENV LAVALINK_SERVER_PASSWORD=${LAVALINK_SERVER_PASSWORD}
 
 COPY . .
 
-RUN pip install discord pynacl yt-dlp wavelink
+RUN pip install discord wavelink
 
 ENTRYPOINT ["python", "main.py"]
