@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Action SSH
       id: action-ssh
-      uses: tiyee/action-ssh@release
+      uses: tiyee/action-ssh@v1.0.1
       with:
         host: ${{ secrets.SSH_HOST }} 
         port: ${{ secrets.SSH_PORT }} 
