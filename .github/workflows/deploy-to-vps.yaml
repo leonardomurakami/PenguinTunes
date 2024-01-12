@@ -1,0 +1,22 @@
+name: "[CD] Deploy bot on VPS"
+on:
+  workflow_dispatch:
+  push:
+      branches:
+          - main
+
+jobs:
+  run_ssh:
+    name: Run command on SSH
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Action SSH
+      id: action-ssh
+      uses: tiyee/action-ssh@release
+      with:
+        host: ${{ secrets.SSH_HOST }} 
+        port: ${{ secrets.SSH_PORT }} 
+        username: ${{ secrets.SSH_USERNAME }} 
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY }} 
+        command: 'bash discord_startup.sh'
