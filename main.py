@@ -44,6 +44,10 @@ class Bot(commands.Bot):
             return
         await player.play(player.queue.get())
 
+    async def on_wavelink_inactive_player(self, player: wavelink.Player) -> None:
+        await player.channel.send(f"The player has been inactive for `{player.inactive_timeout}` seconds. Goodbye!")
+        await player.disconnect()
+
 
 bot: Bot = Bot()
 
