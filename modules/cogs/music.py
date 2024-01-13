@@ -24,7 +24,7 @@ class Music(commands.Cog):
             return
         
         player.queue.clear()
-        player.seek(player.current.length)
+        await player.seek(player.current.length)
         await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
 
     @commands.hybrid_command(name='shuffle')
