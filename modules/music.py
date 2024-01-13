@@ -228,8 +228,8 @@ class Music(commands.Cog):
         
     @commands.hybrid_command(name='autoplay')
     async def autoplay(self, ctx: commands.Context, *, autoplay_mode: str) -> None:
-        f"""
-        Sets the autoplay mode for the bot. Use {BOT_PREFIX}help autoplay to see modes.
+        """
+        Sets the autoplay mode for the bot. Use p!help autoplay to see modes.
         
         Parameters:
         autoplay_mode: A string representing the autoplay mode. 'enabled', 'partial', 'disabled'.
@@ -282,7 +282,7 @@ class Music(commands.Cog):
     @commands.hybrid_command(name='loop')
     async def loop(self, ctx: commands.Context, loop_mode: str) -> None:
         """
-        Changes the player's loop mode. Use {BOT_PREFIX}help autoplay to see modes.
+        Changes the player's loop mode. Use p!help loop to see modes.
 
         Parameters:
         loop_mode: A string representing the loop mode. Valid modes: 'normal', 'loop', 'loop_all'
