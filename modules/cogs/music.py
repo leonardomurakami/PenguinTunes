@@ -1,5 +1,5 @@
 import random
-from typing import cast
+from typing import Optional, cast
 import discord
 import wavelink
 
@@ -7,7 +7,6 @@ from discord.ext import commands
 
 from modules.globals import BOT_PREFIX, QUEUE_DECORATORS, GREEN_CHECKMARK_EMOJI, RED_CROSS_EMOJI
 from utils import create_track_embed, milliseconds_to_mm_ss
-
 
 class Music(commands.Cog):
     def __init__(self, bot):
