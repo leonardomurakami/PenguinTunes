@@ -1,5 +1,5 @@
 import random
-from typing import cast
+from typing import Optional, cast
 import discord
 import wavelink
 
@@ -8,12 +8,11 @@ from discord.ext import commands
 from modules.globals import BOT_PREFIX, QUEUE_DECORATORS, GREEN_CHECKMARK_EMOJI, RED_CROSS_EMOJI
 from utils import create_track_embed, milliseconds_to_mm_ss
 
-
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='stop')
+    @commands.hybrid_command(name='stop')
     async def stop(self, ctx: commands.Context):
         """
         Stops the music playback and clears the queue.
@@ -28,7 +27,7 @@ class Music(commands.Cog):
         player.seek(player.current.length)
         await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
 
-    @commands.command(name='shuffle')
+    @commands.hybrid_command(name='shuffle')
     async def shuffle(self, ctx: commands.Context):
         """
         Shuffles the music queue.
@@ -43,7 +42,7 @@ class Music(commands.Cog):
         await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
 
 
-    @commands.command(name='play', alias=['mp'])
+    @commands.hybrid_command(name='play', alias=['mp'])
     async def play(self, ctx: commands.Context, *, query: str) -> None:
         """
         Plays a song based on the given query. The query can be a URL or a search term. 
@@ -95,7 +94,7 @@ class Music(commands.Cog):
         if not player.playing:
             await player.play(player.queue.get(), volume=30)
     
-    @commands.command(name='skip')
+    @commands.hybrid_command(name='skip')
     async def skip(self, ctx: commands.Context) -> None:
         """
         Skips the current song in the queue.
@@ -112,7 +111,7 @@ class Music(commands.Cog):
             await player.stop()
         await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
         
-    @commands.command(name='pause', aliases=['resume', 'unpause', 'despause'])
+    @commands.hybrid_command(name='pause', aliases=['resume', 'unpause', 'despause'])
     async def pause(self, ctx: commands.Context):
         """
         Toggles playback pause/resume.
@@ -129,7 +128,7 @@ class Music(commands.Cog):
         else:
             await ctx.send("The bot is not connected to a voice channel.")
 
-    @commands.command(name='leave')
+    @commands.hybrid_command(name='leave')
     async def leave(self, ctx: commands.Context) -> None:
         """
         Disconnects the player from the voice channel.
@@ -143,7 +142,7 @@ class Music(commands.Cog):
         await player.disconnect()
         await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
 
-    @commands.command(name='nightcore')
+    @commands.hybrid_command(name='nightcore')
     async def nightcore(self, ctx: commands.Context) -> None:
         """
         Sets the music filter to a nightcore style.
@@ -159,7 +158,7 @@ class Music(commands.Cog):
         await player.set_filters(filters)
         await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def normal(self, ctx: commands.Context) -> None:
         """
         Resets the music filter to normal, removing any active filters.
@@ -177,7 +176,7 @@ class Music(commands.Cog):
 
     
 
-    @commands.command(name='queue')
+    @commands.hybrid_command(name='queue')
     async def queue(self, ctx: commands.Context) -> None:
         """
         Displays the current music queue.
@@ -209,7 +208,7 @@ class Music(commands.Cog):
             await ctx.send("Queue is empty. Try adding some music to it")
             await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
 
-    @commands.command(name='np')
+    @commands.hybrid_command(name='np')
     async def nowplaying(self, ctx: commands.Context) -> None:
         """
         Shows information about the currently playing song.
@@ -226,7 +225,7 @@ class Music(commands.Cog):
         embed.add_field(name = 'Current', value=f"{milliseconds_to_mm_ss(player.position)}/{milliseconds_to_mm_ss(track.length)}")
         await player.home.send(embed=embed)
         
-    @commands.command(name='autoplay')
+    @commands.hybrid_command(name='autoplay')
     async def autoplay(self, ctx: commands.Context, *, autoplay_mode: str) -> None:
         """
         Sets the autoplay mode for the bot. Use p!help autoplay to see modes.
@@ -253,8 +252,8 @@ class Music(commands.Cog):
             await ctx.send("Invalid mode passed. Valid modes are: {enabled, partial, disabled}")
             await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
 
-    @commands.command(name='volume')
-    async def volume(self, ctx: commands.Context, volume: int | float) -> None:
+    @commands.hybrid_command(name='volume')
+    async def volume(self, ctx: commands.Context, volume: float) -> None:
         """
         Changes the player's volume.
 
@@ -279,7 +278,7 @@ class Music(commands.Cog):
         player.set_volume(volume)
         await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
 
-    @commands.command(name='loop')
+    @commands.hybrid_command(name='loop')
     async def loop(self, ctx: commands.Context, loop_mode: str) -> None:
         """
         Changes the player's loop mode. Use p!help loop to see modes.

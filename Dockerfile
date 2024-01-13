@@ -8,6 +8,7 @@ ENV LAVALINK_SERVER_PASSWORD=${LAVALINK_SERVER_PASSWORD}
 
 COPY . .
 
-RUN pip install discord wavelink
+RUN apt update && apt install -y git
+RUN pip install discord wavelink git+https://github.com/InterStella0/starlight-dpy
 
 ENTRYPOINT ["python", "main.py"]
