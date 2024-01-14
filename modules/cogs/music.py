@@ -5,7 +5,7 @@ import wavelink
 
 from discord.ext import commands
 
-from modules.globals import BOT_PREFIX, QUEUE_DECORATORS, GREEN_CHECKMARK_EMOJI, RED_CROSS_EMOJI
+from modules.globals import config
 from utils import create_track_embed, milliseconds_to_mm_ss
 
 class Music(commands.Cog):
@@ -20,12 +20,12 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         player.queue.clear()
         await player.seek(player.current.length)
-        await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+        await ctx.message.add_reaction(f"{config.emoji.success}")
 
     @commands.hybrid_command(name='shuffle')
     async def shuffle(self, ctx: commands.Context):
@@ -35,11 +35,11 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         player.queue.shuffle()
-        await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+        await ctx.message.add_reaction(f"{config.emoji.success}")
 
 
     @commands.hybrid_command(name='play', alias=['mp'])
@@ -77,6 +77,8 @@ class Music(commands.Cog):
             tracks: wavelink.Search = await wavelink.Playable.search(query)
         elif query.startswith("music:"):
             tracks: wavelink.Search = await wavelink.Playable.search(query, source="ytmsearch:")
+        elif query.startswith("spotify:"):
+            tracks: wavelink.Search = await wavelink.Playable.search(query, source="spsearch:")
         else:
             tracks: wavelink.Search = await wavelink.Playable.search(query, source="ytsearch:")
         if not tracks:
@@ -102,14 +104,14 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         if player.queue:
             await player.seek(player.current.length)
         else:
             await player.stop()
-        await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+        await ctx.message.add_reaction(f"{config.emoji.success}")
         
     @commands.hybrid_command(name='pause', aliases=['resume', 'unpause', 'despause'])
     async def pause(self, ctx: commands.Context):
@@ -119,12 +121,12 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         if player.playing:
             await player.pause(not player.paused)
-            await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.success}")
         else:
             await ctx.send("The bot is not connected to a voice channel.")
 
@@ -136,11 +138,11 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
 
         await player.disconnect()
-        await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+        await ctx.message.add_reaction(f"{config.emoji.success}")
 
     @commands.hybrid_command(name='nightcore')
     async def nightcore(self, ctx: commands.Context) -> None:
@@ -150,13 +152,13 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
 
         filters: wavelink.Filters = player.filters
         filters.timescale.set(pitch=1.2, speed=1.2, rate=1)
         await player.set_filters(filters)
-        await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+        await ctx.message.add_reaction(f"{config.emoji.success}")
 
     @commands.hybrid_command()
     async def normal(self, ctx: commands.Context) -> None:
@@ -166,13 +168,13 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
 
         filters: wavelink.Filters = player.filters
         filters.reset()
         await player.set_filters(filters)
-        await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+        await ctx.message.add_reaction(f"{config.emoji.success}")
 
     
 
@@ -184,7 +186,7 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         if player.queue:
@@ -194,7 +196,7 @@ class Music(commands.Cog):
             else:
                 time_to_music = 0
             for track in player.queue[:10]:
-                queue_description += f"{random.choice(QUEUE_DECORATORS)} {track.title[:20]} by {track.author} | in {milliseconds_to_mm_ss(time_to_music)}\n"
+                queue_description += f"{random.choice(config.emoji.QUEUE_DECORATORS)} {track.title[:20]} by {track.author} | in {milliseconds_to_mm_ss(time_to_music)}\n"
                 time_to_music += track.length
             
             embed: discord.Embed = discord.Embed(title="Next up!")
@@ -203,10 +205,10 @@ class Music(commands.Cog):
                 embed.description += f"\n...and {len(player.queue) - 10} more tracks"
             embed.color = discord.Color.blurple()
             await player.home.send(embed=embed)
-            await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.success}")
         else:
             await ctx.send("Queue is empty. Try adding some music to it")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
 
     @commands.hybrid_command(name='np')
     async def nowplaying(self, ctx: commands.Context) -> None:
@@ -216,7 +218,7 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         track = player.current
@@ -236,7 +238,7 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         autoplay_enum = {
@@ -247,10 +249,10 @@ class Music(commands.Cog):
         if autoplay_mode in ['enabled', 'partial', 'disabled']:
             await ctx.send(f"Autoplay mode changed from {player.autoplay} to {autoplay_mode}")
             player.autoplay = autoplay_enum[autoplay_mode]
-            await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.success}")
         else:
             await ctx.send("Invalid mode passed. Valid modes are: {enabled, partial, disabled}")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
 
     @commands.hybrid_command(name='volume')
     async def volume(self, ctx: commands.Context, volume: float) -> None:
@@ -263,7 +265,7 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         if volume > 0 and volume <= 0.2:
@@ -272,11 +274,11 @@ class Music(commands.Cog):
             volume = 200
         else:
             await ctx.send("Invalid volume passed. Value should be from 0 to 1 [Default is 0.1]")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
         
         player.set_volume(volume)
-        await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+        await ctx.message.add_reaction(f"{config.emoji.success}")
 
     @commands.hybrid_command(name='loop')
     async def loop(self, ctx: commands.Context, loop_mode: str) -> None:
@@ -289,7 +291,7 @@ class Music(commands.Cog):
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
 
         loop_enum = {
@@ -306,8 +308,8 @@ class Music(commands.Cog):
                 mode_explanation = "continuously loop through all tracks"
             player.queue.mode = loop_enum[loop_mode]
             await ctx.send(f"The bot is now set to {mode_explanation}")
-            await ctx.message.add_reaction(f"{GREEN_CHECKMARK_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.success}")
         else:
             await ctx.send("Invalid or missing loop mode. Should be: {normal, loop, loop_all}")
-            await ctx.message.add_reaction(f"{RED_CROSS_EMOJI}")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
             return

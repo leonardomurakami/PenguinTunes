@@ -1,36 +1,32 @@
+import os
+from modules._config import Struct as Section
+
 # configs
-BOT_PREFIX="p!"
 
-# constants
-PLAY_PAUSE_EMOJI="\u23ef\ufe0f"
-LAST_TRACK_EMOJI="\u23ee\ufe0f"
-NEXT_TRACK_EMOJI="\u23ed\ufe0f"
-SHUFFLE_EMOJI="\U0001F500"
-NEW_BUTTON_EMOJI="\U0001F195"
-REPEAT_ONE_EMOJI="\U0001F502"
-GREEN_CHECKMARK_EMOJI="\u2705"
-RED_CROSS_EMOJI="\u274c"
-BLUE_BALL_EMOJI="\U0001F535"
-BLACK_BALL_EMOJI="\u26ab"
-PURPLE_BALL_EMOJI="\U0001F7E3"
-BROWN_BALL_EMOJI="\U0001F7E4"
-GREEN_BALL_EMOJI="\U0001F7E2"
-YELLOW_BALL_EMOJI="\U0001F7E1"
-ORANGE_BALL_EMOJI="\U0001F7E0"
-WHITE_BALL_EMOJI="\u26aa"
+config = Section("Bot configs and constants")
+config.default_prefix = "p!"
+config.token = os.getenv("TOKEN")
 
-# styles
-QUEUE_DECORATORS = [
-    BLUE_BALL_EMOJI, BLACK_BALL_EMOJI, PURPLE_BALL_EMOJI, 
-    BROWN_BALL_EMOJI, GREEN_BALL_EMOJI, YELLOW_BALL_EMOJI, 
-    ORANGE_BALL_EMOJI, WHITE_BALL_EMOJI
+config.lavalink = Section("Lavalink config section")
+config.lavalink.host = os.getenv("LAVALINK_SERVER_HOST")
+config.lavalink.port = os.getenv("LAVALINK_SERVER_PORT")
+config.lavalink.password = os.getenv("LAVALINK_SERVER_PASSWORD")
+
+config.emoji = Section("Emoji config section, holds constants mostly")
+config.emoji.success="\u2705"
+config.emoji.fail="\u274c"
+
+config.emoji.queue_decorators = Section("Emoji decorators for queue")
+config.emoji.queue_decorators = [
+    "\U0001F535", "\u26ab", "\U0001F7E3", 
+    "\U0001F7E4", "\U0001F7E2", "\U0001F7E1", 
+    "\U0001F7E0", "\u26aa"
 ]
 
-AV_EMOJIS = {
-    'play': PLAY_PAUSE_EMOJI,
-    'last_track': LAST_TRACK_EMOJI,
-    'next_track': NEXT_TRACK_EMOJI,
-    'shuffle': SHUFFLE_EMOJI,
-    'autoplay': NEW_BUTTON_EMOJI,
-    'repeat_one': REPEAT_ONE_EMOJI
-}
+config.emoji.av_emoji = Section("Emojis for player buttons")
+config.emoji.av_emoji.pause_play = "\u23ef\ufe0f"
+config.emoji.av_emoji.last_track = "\u23ee\ufe0f"
+config.emoji.av_emoji.next_track = "\u23ed\ufe0f"
+config.emoji.av_emoji.shuffle = "\U0001F500"
+config.emoji.av_emoji.autoplay = "\U0001F195"
+config.emoji.av_emoji.repeat_one = "\U0001F502"

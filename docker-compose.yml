@@ -1,12 +1,14 @@
 version: "3.8"
 services:
-  piplup:
+  penguintunes:
     restart: unless-stopped
     build:
       context: .
-      args:
+    environment:
         TOKEN: ${DISCORD_TOKEN}
         LAVALINK_SERVER_PASSWORD: ${LAVALINK_SERVER_PASSWORD}
+        LAVALINK_SERVER_HOST: ${LAVALINK_SERVER_HOST}
+        LAVALINK_SERVER_PORT: ${LAVALINK_SERVER_PORT}
     depends_on: 
       - lavalink
     networks:
@@ -19,9 +21,11 @@ services:
       - _JAVA_OPTIONS=-Xmx2G
       - SERVER_PORT=2333
       - LAVALINK_SERVER_PASSWORD=${LAVALINK_SERVER_PASSWORD}
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
     volumes:
       - ./application.yml:/opt/Lavalink/application.yml
-      - ./plugins/:/opt/Lavalink/plugins/
+      - ./plugins/:/opt/Lavalink/plugins/:rw
     networks:
       - lavalink
     expose:

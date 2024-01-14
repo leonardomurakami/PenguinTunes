@@ -1,25 +1,19 @@
 import discord
 import wavelink
 
-from modules.globals import AV_EMOJIS
-from modules.buttons.music_buttons import LoopButton, ShuffleButton, NextTrackButton, ResetButton, PauseButton
+from modules.buttons.music import MusicButton
+from modules.globals import config
 
 class PlayerView(discord.ui.View):
     def __init__(self, *, player: wavelink.Player, timeout: float | None = 180):
         super().__init__(timeout=timeout)
 
         self.player = player
-        self.add_item(LoopButton(player))
-        self.add_item(ResetButton(player))
-        self.add_item(PauseButton(player))
-        self.add_item(NextTrackButton(player))
-        self.add_item(ShuffleButton(player))
-
-    def get_initial_loop_style(self):
-        if self.player.queue.mode == wavelink.QueueMode.normal:
-            return discord.ButtonStyle.grey
-        else:
-            return discord.ButtonStyle.blurple
+        self.add_item(MusicButton(player, label=config.emoji.av_emoji.repeat_one, action='loop'))
+        self.add_item(MusicButton(player, label=config.emoji.av_emoji.last_track, action='reset'))
+        self.add_item(MusicButton(player, label=config.emoji.av_emoji.pause_play, action='pause'))
+        self.add_item(MusicButton(player, label=config.emoji.av_emoji.next_track, action='next_track'))
+        self.add_item(MusicButton(player, label=config.emoji.av_emoji.shuffle, action='shuffle'))
 
     async def destroy_view(self):
         await self.message.edit(view=None)
