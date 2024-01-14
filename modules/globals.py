@@ -6,6 +6,7 @@ from modules._config import Struct as Section
 config = Section("Bot configs and constants")
 config.default_prefix = "p!"
 config.token = os.getenv("TOKEN")
+config.bot_owner_id = os.getenv("BOT_OWNER_ID")
 
 config.lavalink = Section("Lavalink config section")
 config.lavalink.host = os.getenv("LAVALINK_SERVER_HOST")

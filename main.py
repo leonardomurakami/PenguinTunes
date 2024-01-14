@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from utils import create_track_embed
 from modules.globals import config
 from modules.cogs.music import Music
+from modules.cogs.config import Config
 from modules.views.music import PlayerView
 
 
@@ -133,6 +134,7 @@ bot: Bot = Bot()
 async def main() -> None:
     async with bot:
         await bot.add_cog(Music(bot))
+        await bot.add_cog(Config(bot))
         await bot.start(os.getenv("TOKEN"))
 
 

@@ -9,6 +9,7 @@ services:
         LAVALINK_SERVER_PASSWORD: ${LAVALINK_SERVER_PASSWORD}
         LAVALINK_SERVER_HOST: ${LAVALINK_SERVER_HOST}
         LAVALINK_SERVER_PORT: ${LAVALINK_SERVER_PORT}
+        BOT_OWNER_ID: ${BOT_OWNER_ID}
     depends_on: 
       - lavalink
     networks:
