@@ -65,7 +65,7 @@ class Bot(commands.Bot):
         nodes = [
             wavelink.Node(
                 uri=f"{config.lavalink.host}:{config.lavalink.port}",
-                password=config.lavalink.password
+                password=config.lavalink.password,
             ),
         ]
         await wavelink.Pool.connect(nodes=nodes, client=self)
@@ -120,10 +120,13 @@ class Bot(commands.Bot):
             return
         if player.queue:
             await player.play(player.queue.get())
-        else:
-            await player.channel.send(f"The queue is over. Goodbye!")
+        elif player.autoplay == wavelink.AutoPlayMode.disabled:
+            await player.home.send(f"The queue is over. Goodbye!")
             await player.disconnect()
 
+    async def on_wavelink_inactive_player(self, player: wavelink.Player) -> None:
+        await player.channel.send(f"The player has been inactive for `{player.inactive_timeout}` seconds. Goodbye!")
+        await player.disconnect()
 
 bot: Bot = Bot()
 
