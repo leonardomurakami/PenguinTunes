@@ -98,10 +98,10 @@ class MusicButton(discord.ui.Button):
             self.style = discord.ButtonStyle.blurple
             self.label = config.emoji.av_emoji.wireless
             self.player.autoplay = wavelink.AutoPlayMode.enabled
-            self.player.home.send("Autoplay enabled.")
+            await self.player.home.send("Autoplay enabled.")
         else:
             self.style = discord.ButtonStyle.grey
             self.label = config.emoji.av_emoji.mobile
             self.player.autoplay = wavelink.AutoPlayMode.disabled
-            self.player.home.send("Autoplay disabled.")
+            await self.player.home.send("Autoplay disabled.")
         await interaction.response.edit_message(view=self.view)
