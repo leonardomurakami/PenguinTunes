@@ -8,6 +8,11 @@ config.default_prefix = "p!"
 config.token = os.getenv("TOKEN")
 config.bot_owner_id = os.getenv("BOT_OWNER_ID")
 
+config.fun = Section("Fun section configuration and assets")
+config.fun.font_size = 14
+config.fun.font_path = 'assets/fonts/Roboto-Light.ttf'
+config.fun.sisyphus_image_path = 'assets/pictures/sisyphus.jpg'
+
 config.database = Section("Database config section")
 config.database.db_username = os.getenv("DB_USERNAME")
 config.database.db_password = os.getenv("DB_PASSWORD")
