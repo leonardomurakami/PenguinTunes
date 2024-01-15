@@ -27,6 +27,7 @@ class Music(commands.Cog):
             return
 
         player.queue.clear()
+        player.autoplay = wavelink.AutoPlayMode.disabled
         await player.seek(player.current.length)
         await ctx.message.add_reaction(f"{config.emoji.success}")
 
@@ -44,7 +45,7 @@ class Music(commands.Cog):
         player.queue.shuffle()
         await ctx.message.add_reaction(f"{config.emoji.success}")
 
-    @commands.hybrid_command(name="play", alias=["mp"])
+    @commands.hybrid_command(name="play", alias=["p"])
     async def play(self, ctx: commands.Context, *, query: str) -> None:
         """
         Plays a song based on the given query. The query can be a URL or a search term.

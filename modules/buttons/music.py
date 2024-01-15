@@ -112,7 +112,8 @@ class MusicButton(discord.ui.Button):
         await interaction.response.edit_message(view=self.view)
 
     async def next_track(self, interaction):
-        await self.player.seek(self.player.current.length)
+        if self.player.current:
+            await self.player.seek(self.player.current.length)
         await interaction.response.defer()
 
     async def autoplay(self, interaction):

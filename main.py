@@ -18,8 +18,6 @@ from modules.cogs.config import Config
 from modules.views.music import PlayerView
 from modules.orm.database import Guild
 
-# TODO: Implement a SQLAlchemy Session inside bot main class
-# TODO: Make bot pull prefix from Database instead of fixed to allow for custom prefixes
 # TODO: Implement commands outside of Music cog. Fun cog, Modding cog.
 # TODO: Implement simple dashboard to visualize, queue, control playstate of music from web.
 # TODO: Allow members to save a playlist to bots database for quick players
