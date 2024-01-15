@@ -9,11 +9,18 @@ services:
         LAVALINK_SERVER_PASSWORD: ${LAVALINK_SERVER_PASSWORD}
         LAVALINK_SERVER_HOST: ${LAVALINK_SERVER_HOST}
         LAVALINK_SERVER_PORT: ${LAVALINK_SERVER_PORT}
+        DB_USERNAME: ${DB_USERNAME}
+        DB_PASSWORD: ${DB_PASSWORD}
+        DB_DATABASE: ${DB_DATABASE}
+        DB_HOST: "dbpostgres"
+        DB_PORT: "5432"
         BOT_OWNER_ID: ${BOT_OWNER_ID}
     depends_on: 
       - lavalink
+      - dbpostgres
     networks:
       - lavalink
+      - dbpostgres
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4
     container_name: lavalink
@@ -31,8 +38,22 @@ services:
       - lavalink
     expose:
       - 2333
+  dbpostgres:
+    image: postgres
+    volumes:
+      - /private/var/lib/postgresql:/var/lib/postgresql
     ports:
-      - "2333:2333"
+      - "5432:5432"
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    networks:
+      - dbpostgres
 networks:
   lavalink:
     name: lavalink
+  dbpostgres:
+    name: dbpostgres

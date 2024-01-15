@@ -4,19 +4,26 @@ import discord
 import os
 import wavelink
 
+from sqlalchemy import select, insert
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
 from starlight import PaginateHelpCommand
 from discord.ext import commands
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils import create_track_embed
 from modules.globals import config
 from modules.cogs.music import Music
 from modules.cogs.config import Config
 from modules.views.music import PlayerView
+from modules.orm.database import Guild
 
-
+# TODO: Implement a SQLAlchemy Session inside bot main class
+# TODO: Make bot pull prefix from Database instead of fixed to allow for custom prefixes
+# TODO: Implement commands outside of Music cog. Fun cog, Modding cog.
+# TODO: Implement simple dashboard to visualize, queue, control playstate of music from web.
+# TODO: Allow members to save a playlist to bots database for quick players
+# FIXME: Bot won't leave channel if music is paused, no matter how long it stays paused.
 
 
 class Bot(commands.Bot):
@@ -25,8 +32,8 @@ class Bot(commands.Bot):
 
     Attributes:
         session (AsyncSession): Represents a SQLAlchemy session for database operations.
-    
-    The bot is configured with a specific command prefix and intents. It includes a custom help command and 
+
+    The bot is configured with a specific command prefix and intents. It includes a custom help command and
     methods for handling music playback events using Wavelink nodes.
 
     Methods:
@@ -36,31 +43,58 @@ class Bot(commands.Bot):
         on_wavelink_track_start: Handles the event when a track starts playing.
         on_wavelink_track_end: Handles the event when a track finishes playing.
     """
+
     def __init__(self) -> None:
         """
         Initializes the Bot instance with a specific command prefix, intents, description, and a custom help command.
         Sets up logging and initializes the superclass.
         """
-        # self.session = sessionmaker(create_engine(), class_=AsyncSession)
+        self.sessionmaker = sessionmaker(create_async_engine(f'{config.database.db_driver}://{config.database.connection_url}'), class_=AsyncSession)
+        self.guild_prefix_cache = {}
+
         intents = discord.Intents.all()
         discord.utils.setup_logging()
         super().__init__(
-            command_prefix=config.default_prefix,
+            command_prefix=self.get_prefix,
             intents=intents,
             description="Piplup",
-            help_command=PaginateHelpCommand()
+            help_command=PaginateHelpCommand(),
         )
 
-    # @property
-    # def session(self) -> AsyncSession:
-    #     """
-    #     Property that returns an AsyncSession object for database interactions.
-    #     """
-    #     return self.session()
+    async def get_prefix(self, message):
+        if not message.guild:
+            return commands.when_mentioned_or(config.default_prefix)(bot, message)
+        if message.guild.id in self.guild_prefix_cache.keys():
+            prefix = self.guild_prefix_cache[message.guild.id]
+        else:
+             async with self.session as session:
+                result = await session.execute(
+                    select(Guild)
+                        .where(Guild.id == int(message.guild.id))
+                )
+                guild = result.scalars().first()
+                if not guild:
+                    await session.execute(
+                        insert(Guild)
+                            .values(id=message.guild.id, prefix=config.default_prefix)
+                    )
+                    await session.commit()
+                    prefix = config.default_prefix
+                else:
+                    prefix = guild.prefix
+        return commands.when_mentioned_or(prefix)(self, message)
+        
+
+    @property
+    def session(self) -> AsyncSession:
+        """
+        Property that returns an AsyncSession object for database interactions.
+        """
+        return self.sessionmaker()
 
     async def setup_hook(self) -> None:
         """
-        Asynchronously sets up the necessary Wavelink nodes for music playback. 
+        Asynchronously sets up the necessary Wavelink nodes for music playback.
         This method is a part of the bot's setup process.
         """
         nodes = [
@@ -79,7 +113,7 @@ class Bot(commands.Bot):
 
     async def on_wavelink_node_ready(self, payload: wavelink.NodeReadyEventPayload):
         """
-        Event listener called when a Wavelink node is successfully connected. 
+        Event listener called when a Wavelink node is successfully connected.
         Logs information about the node.
 
         Args:
@@ -90,10 +124,11 @@ class Bot(commands.Bot):
             "Wavelink Node connected: %s | Resumed: %s", payload.node, payload.resumed
         )
 
-
-    async def on_wavelink_track_start(self, payload: wavelink.TrackStartEventPayload) -> None:
+    async def on_wavelink_track_start(
+        self, payload: wavelink.TrackStartEventPayload
+    ) -> None:
         """
-        Event listener for when a track starts playing. 
+        Event listener for when a track starts playing.
         It creates an embed and view for the playing track and sends it to the player's designated channel.
 
         Args:
@@ -108,9 +143,11 @@ class Bot(commands.Bot):
         view = PlayerView(player=player, timeout=track.length)
         await player.home.send(embed=embed, view=view)
 
-    async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload) -> None:
+    async def on_wavelink_track_end(
+        self, payload: wavelink.TrackEndEventPayload
+    ) -> None:
         """
-        Event listener for when a track ends. 
+        Event listener for when a track ends.
         It plays the next track in the queue if available, or sends a message indicating the end of the queue.
 
         Args:
@@ -120,16 +157,27 @@ class Bot(commands.Bot):
         if not player:
             return
         if player.queue:
-            await player.play(player.queue.get())
+            await player.play(player.queue.get())  # HACK: Is this necessary?
         elif player.autoplay == wavelink.AutoPlayMode.disabled:
-            await player.home.send(f"The queue is over. Goodbye!")
+            await player.home.send("The queue is over. Goodbye!")
             await player.disconnect()
 
     async def on_wavelink_inactive_player(self, player: wavelink.Player) -> None:
-        await player.channel.send(f"The player has been inactive for `{player.inactive_timeout}` seconds. Goodbye!")
+        await player.channel.send(
+            f"The player has been inactive for `{player.inactive_timeout}` seconds. Goodbye!"
+        )
         await player.disconnect()
 
+    async def on_voice_state_update(self, member, before, after):
+        voice_state = member.guild.voice_client
+        if voice_state is None:
+            return
+        if len(voice_state.channel.members) == 1:
+            await voice_state.disconnect()
+
+
 bot: Bot = Bot()
+
 
 async def main() -> None:
     async with bot:
