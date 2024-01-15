@@ -41,7 +41,7 @@ services:
   dbpostgres:
     image: postgres
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - data:/var/lib/postgresql
     ports:
       - "5433:5432"
     expose:
@@ -50,11 +50,12 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE}
+      PGDATA : /var/lib/postgresql/data/pgdata
     networks:
       - dbpostgres
 
 volumes:
-  postgres_data:
+  data:
 
 networks:
   lavalink:
