@@ -13,6 +13,7 @@ class CassinoView(discord.ui.View):
         self.cassino_player: CassinoPlayer | None = None
         
         self.slot_machine: SlotMachine | None = None
+        self.bet_multiplier: int = 1
         self.blackjack = None
         self.roulette = None
         self.prepare_menu()
@@ -31,52 +32,46 @@ class CassinoView(discord.ui.View):
         self.add_item(
             CassinoButton(
                 style=discord.ButtonStyle.green,
-                player=self.cassino_player,
-                label="$10",
-                action="bet_10",
+                label="$1" + "0"*self.bet_multiplier,
+                action="bet_1" + "0"*self.bet_multiplier,
                 row=0,
             )
         )
         self.add_item(
             CassinoButton(
                 style=discord.ButtonStyle.grey,
-                player=self.cassino_player,
-                label="$20",
-                action="bet_20",
+                label="$2" + "0"*self.bet_multiplier,
+                action="bet_2" + "0"*self.bet_multiplier,
                 row=0,
             )
         )
         self.add_item(
             CassinoButton(
                 style=discord.ButtonStyle.grey,
-                player=self.cassino_player,
-                label="$30",
-                action="bet_30",
+                label="$3" + "0"*self.bet_multiplier,
+                action="bet_3" + "0"*self.bet_multiplier,
                 row=0,
             )
         )
         self.add_item(
             CassinoButton(
                 style=discord.ButtonStyle.grey,
-                player=self.cassino_player,
-                label="$40",
-                action="bet_40",
+                label="$4" + "0"*self.bet_multiplier,
+                action="bet_4" + "0"*self.bet_multiplier,
                 row=0,
             )
         )
         self.add_item(
             CassinoButton(
                 style=discord.ButtonStyle.grey,
-                player=self.cassino_player,
-                label="$50",
-                action="bet_50",
+                label="$5" + "0"*self.bet_multiplier,
+                action="bet_5" + "0"*self.bet_multiplier,
                 row=0,
             )
         )
         self.add_item(
             CassinoButton(
                 style=discord.ButtonStyle.blurple,
-                player=self.cassino_player,
                 label="<<",
                 action="back",
                 row=1,
@@ -85,7 +80,6 @@ class CassinoView(discord.ui.View):
         self.add_item(
             CassinoButton(
                 style=discord.ButtonStyle.red,
-                player=self.cassino_player,
                 label=f"{config.emoji.cassino.slots} Spin",
                 action="spin",
                 row=1,
@@ -94,9 +88,24 @@ class CassinoView(discord.ui.View):
         self.add_item(
             CassinoButton(
                 style=discord.ButtonStyle.blurple,
-                player=self.cassino_player,
                 label=f"Prizes",
                 action="prizes",
+                row=1,
+            )
+        )
+        self.add_item(
+            CassinoButton(
+                style=discord.ButtonStyle.blurple,
+                label=f"/10",
+                action="decrease_bet",
+                row=1,
+            )
+        )
+        self.add_item(
+            CassinoButton(
+                style=discord.ButtonStyle.blurple,
+                label=f"x10",
+                action="increase_bet",
                 row=1,
             )
         )

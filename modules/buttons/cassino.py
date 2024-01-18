@@ -26,6 +26,10 @@ class CassinoSelect(discord.ui.Select):
         The asynchronous callback executed when the button is clicked.
         - interaction: The interaction instance associated with the button click.
         """
+        if interaction.user.id != self.view.member.id:
+            await interaction.response.send_message("This is not your cassino!", ephemeral=True)
+            return
+        
         if self.values[0] == "slots":
             await self.slots(interaction)
         elif self.values[0] == "blackjack":
@@ -60,7 +64,6 @@ class CassinoSelect(discord.ui.Select):
 class CassinoButton(discord.ui.Button):
     def __init__(
         self,
-        player: CassinoPlayer,
         label: str,
         action: str,
         row: int | None = None,
@@ -74,7 +77,6 @@ class CassinoButton(discord.ui.Button):
         - row: The row where the button should be placed in the Discord UI.
         - style: The style of the button (color/theme).
         """
-        self.player = player
         self.action = action
         super().__init__(
             style=style,
@@ -93,43 +95,51 @@ class CassinoButton(discord.ui.Button):
         The asynchronous callback executed when the button is clicked.
         - interaction: The interaction instance associated with the button click.
         """
+        if interaction.user.id != self.view.member.id:
+            await interaction.response.send_message("This is not your cassino!", ephemeral=True)
+            return
+
         if self.action.startswith("bet"):
-            await self.bet(interaction, int(self.action.split("_")[1]))
+            await self.bet(interaction)
         elif self.action == "spin":
             await self.spin(interaction)
         elif self.action == "back":
             await self.back(interaction)
         elif self.action == "prizes":
             await self.prizes(interaction)
+        elif self.action == "increase_bet":
+            await self.increase_bet(interaction)
+        elif self.action == "decrease_bet":
+            await self.decrease_bet(interaction)
 
-    async def bet(self, interaction: discord.Interaction, amount):
-        if self.player.db_player.balance < amount:
+    async def bet(self, interaction: discord.Interaction):
+        amount = int(self.action.split("_")[1])
+        if self.view.cassino_player.db_player.balance < amount:
             await interaction.response.send_message("You don't have enough money to bet that amount!", ephemeral=True)
             return
-        self.player.bet = amount
+        self.view.cassino_player.bet = amount
         self.bet_change_style(discord.ButtonStyle.green)
         await interaction.response.edit_message(view=self.view)
 
     async def spin(self, interaction: discord.Interaction):
-        if self.player.bet > self.player.db_player.balance:
+        if self.view.cassino_player.bet > self.view.cassino_player.db_player.balance:
             await interaction.response.send_message("You don't have enough money to bet that amount!", ephemeral=True)
             return
         machine_result = self.view.slot_machine.spin()    
-        prize = self.view.slot_machine.calculate_prize(machine_result, self.player.bet)
+        prize = self.view.slot_machine.calculate_prize(machine_result, self.view.cassino_player.bet)
 
         content = " ".join(machine_result)
         if prize != 0:
-            self.player.db_player.balance += prize
-            self.player.db_player.money_won += prize
-            self.player.db_player.slot_wins += prize
+            self.view.cassino_player.db_player.balance += prize
+            self.view.cassino_player.db_player.money_won += prize
+            self.view.cassino_player.db_player.slot_wins += prize
             content += f"\nYou won ${prize}!"
         else:
-            self.player.db_player.money_lost += self.player.bet
+            self.view.cassino_player.db_player.money_lost += self.view.cassino_player.bet
             content += "\nYou lost!"
-        content += f"\nYour balance is now ${self.player.db_player.balance}"
-        self.player.db_player.balance -= self.player.bet
-        
-        await self.player.update(self.player.db_player)
+        self.view.cassino_player.db_player.balance -= self.view.cassino_player.bet
+        content += f"\nYour balance is now ${self.view.cassino_player.db_player.balance}"
+        await self.view.cassino_player.update(self.view.cassino_player.db_player)
         await interaction.response.edit_message(content=content, view=self.view)
 
     async def prizes(self, interaction: discord.Interaction):
@@ -138,4 +148,19 @@ class CassinoButton(discord.ui.Button):
 
     async def back(self, interaction: discord.Interaction):
         self.view.prepare_menu()
+        await interaction.response.edit_message(content=None, view=self.view)
+
+    async def increase_bet(self, interaction: discord.Interaction):
+        self.view.bet_multiplier += 1
+        self.view.cassino_player.bet *= 10
+        await self.view.prepare_slots()
+        await interaction.response.edit_message(view=self.view)
+
+    async def decrease_bet(self, interaction: discord.Interaction):
+        if self.view.bet_multiplier == 0:
+            await interaction.response.send_message("You can't bet less than $1!", ephemeral=True)
+            return
+        self.view.bet_multiplier -= 1
+        self.view.cassino_player.bet /= 10
+        await self.view.prepare_slots()
         await interaction.response.edit_message(view=self.view)

@@ -71,7 +71,7 @@ class SlotMachine:
         self.probability_distribution = self.calculate_probabilities()
 
     def calculate_probabilities(self):
-        adjustment_factor = 2
+        adjustment_factor = config.fun.cassino_adjustment_factor
         total_weight = sum(1 / (prize * adjustment_factor) for prize in self.full_prizes.values())
         probabilities = {symbol: (1 / (prize * adjustment_factor)) / total_weight for symbol, prize in self.full_prizes.items()}
         return probabilities
