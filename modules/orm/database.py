@@ -37,7 +37,7 @@ Class Descriptions:
     - This structure allows for easy retrieval, update, and management of guild-related data in the context of a Discord bot using the SQLAlchemy ORM.
 """
 
-from sqlalchemy import String, BigInteger
+from sqlalchemy import String, BigInteger, Integer
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -59,3 +59,20 @@ class Guild(Base):
         - Returns a formatted string representation of the Guild instance, including its id and prefix.
         """
         return f"User(id={self.id!r}, prefix={self.prefix!r})"
+
+class Cassino(Base):
+    __tablename__ = "cassino"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    balance: Mapped[int] = mapped_column(Integer, default=1000)
+    slot_wins: Mapped[int] = mapped_column(Integer, default=0)
+    blackjack_wins: Mapped[int] = mapped_column(Integer, default=0)
+    money_won: Mapped[int] = mapped_column(Integer, default=0)
+    money_lost: Mapped[int] = mapped_column(Integer, default=0)
+
+    def __repr__(self) -> str:
+        """
+        - Overrides the default representation method.
+        - Returns a formatted string representation of the Guild instance, including its id and prefix.
+        """
+        return f"User(id={self.id!r}, money={self.balance!r}, slot_wins={self.slot_wins!r}, blackjack_wins={self.blackjack_wins!r}, money_won={self.money_won!r}, money_lost={self.money_lost!r})"

@@ -91,3 +91,13 @@ config.emoji.av_emoji.wireless = "\U0001F6DC"
 config.emoji.av_emoji.mobile = "\U0001F4F6"
 config.emoji.av_emoji.play = "\u25b6\ufe0f"
 config.emoji.av_emoji.pause = "\u23f8\ufe0f"
+
+config.emoji.cassino = Section("Emojis for cassino")
+config.emoji.cassino.diamond = "\U0001F48E"
+config.emoji.cassino.cherry = "\U0001F352"
+config.emoji.cassino.lemon = "\U0001F34B"
+config.emoji.cassino.orange = "\U0001F34A"
+config.emoji.cassino.apple = "\U0001F34E"
+config.emoji.cassino.grapes = "\U0001F347"
+config.emoji.cassino.banana = "\U0001F34C"
+config.emoji.cassino.slots = "\U0001F3B0"

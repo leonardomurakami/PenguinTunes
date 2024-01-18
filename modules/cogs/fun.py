@@ -28,6 +28,7 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands
 from modules.globals import config
+from modules.views.fun import CassinoView
 
 
 class Fun(commands.Cog):
@@ -62,3 +63,11 @@ class Fun(commands.Cog):
         base_image.save(final_buffer, "PNG")
         final_buffer.seek(0)
         await ctx.send(file=discord.File(final_buffer, "quote_image.png"))
+
+    @commands.command(name="cassino")
+    async def cassino(self, ctx: commands.Context):
+        """
+        Creates a cassino instance. All should be controlled by the view and buttons.
+        - ctx: The context of the command.
+        """
+        await ctx.send(view=CassinoView(member=ctx.author))

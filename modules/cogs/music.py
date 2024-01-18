@@ -415,19 +415,3 @@ class Music(commands.Cog):
         filters.reset()
         await player.set_filters(filters)
         await ctx.message.add_reaction(f"{config.emoji.success}")
-
-    @commands.hybrid_command(name="nightcore")
-    async def nightcore(self, ctx: commands.Context) -> None:
-        """
-        Sets the music filter to a nightcore style.
-        """
-        player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
-        if not player:
-            await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{config.emoji.fail}")
-            return
-
-        filters: wavelink.Filters = player.filters
-        filters.timescale.set(pitch=1.2, speed=1.2, rate=1)
-        await player.set_filters(filters)
-        await ctx.message.add_reaction(f"{config.emoji.success}")
