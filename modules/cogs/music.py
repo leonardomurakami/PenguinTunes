@@ -189,7 +189,7 @@ class Music(commands.Cog):
         if not player.playing:
             await player.play(player.queue.get(), volume=30)
 
-    @commands.hybrid_command(name="skip", aliases=["next", "fs", "forceskip"])
+    @commands.hybrid_command(name="skip", aliases=["fs", "forceskip"])
     async def skip(self, ctx: commands.Context) -> None:
         """
         Skips the current song in the queue.
