@@ -1,5 +1,41 @@
+"""
+Module Documentation: Bot Configuration
+
+This module defines the configuration settings for a bot, organized into different sections. 
+Each section represents a specific aspect of the bot's functionality and settings.
+
+1. General Bot Configuration (`config`)
+   - default_prefix: Default command prefix for the bot (`str`).
+   - token: Token for the Discord bot, retrieved from environment variables (`str`).
+   - bot_owner_id: Discord ID of the bot owner, retrieved from environment variables (`str`).
+
+2. Fun Section Configuration (`config.fun`)
+   - font_size: Font size for text-based fun features (`int`).
+   - font_path: File path to the font used for text-based fun features (`str`).
+   - sisyphus_image_path: File path to the image of Sisyphus used in fun features (`str`).
+
+3. Database Configuration (`config.database`)
+   - db_username: Database username, retrieved from environment variables (`str`).
+   - db_password: Database password, retrieved from environment variables (`str`).
+   - db_host: Database host address, retrieved from environment variables (`str`).
+   - db_port: Database port, retrieved from environment variables (`str`).
+   - db_database: Database name, retrieved from environment variables (`str`).
+   - connection_url: Full connection URL for the database (`str`).
+   - db_driver: Database driver used by sqlalchemy(`str`).
+
+4. Lavalink Configuration (`config.lavalink`)
+   - host: Host address for Lavalink server, retrieved from environment variables (`str`).
+   - port: Port number for Lavalink server, retrieved from environment variables (`str`).
+   - password: Password for Lavalink server, retrieved from environment variables (`str`).
+
+5. Emoji Configuration (`config.emoji`)
+   - success: Emoji used to indicate success (`str`).
+   - fail: Emoji used to indicate failure (`str`).
+   - queue_decorators: List of emojis used as decorators for queues (`list` of `str`).
+   - av_emoji: Emojis used for player buttons, each with a specific function (`Section`).
+"""
 import os
-from modules._config import Struct as Section
+from modules.utils._config_utils import Struct as Section
 
 # configs
 
@@ -10,8 +46,8 @@ config.bot_owner_id = os.getenv("BOT_OWNER_ID")
 
 config.fun = Section("Fun section configuration and assets")
 config.fun.font_size = 14
-config.fun.font_path = 'assets/fonts/Roboto-Light.ttf'
-config.fun.sisyphus_image_path = 'assets/pictures/sisyphus.jpg'
+config.fun.font_path = "assets/fonts/Roboto-Light.ttf"
+config.fun.sisyphus_image_path = "assets/pictures/sisyphus.jpg"
 
 config.database = Section("Database config section")
 config.database.db_username = os.getenv("DB_USERNAME")
@@ -20,7 +56,7 @@ config.database.db_host = os.getenv("DB_HOST")
 config.database.db_port = os.getenv("DB_PORT")
 config.database.db_database = os.getenv("DB_DATABASE")
 config.database.connection_url = f"{config.database.db_username}:{config.database.db_password}@{config.database.db_host}:{config.database.db_port}/{config.database.db_database}"
-config.database.db_driver = "postgresql+asyncpg"
+config.database.db_driver = "mysql+aiomysql"
 
 config.lavalink = Section("Lavalink config section")
 config.lavalink.host = os.getenv("LAVALINK_SERVER_HOST")

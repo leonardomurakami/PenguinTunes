@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from starlight import PaginateHelpCommand
 from discord.ext import commands
 
-from utils import create_track_embed
+from modules.utils._text_utils import create_track_embed
 from modules.globals import config
 from modules.cogs.music import Music
 from modules.cogs.fun import Fun
@@ -48,7 +48,12 @@ class Bot(commands.Bot):
         Initializes the Bot instance with a specific command prefix, intents, description, and a custom help command.
         Sets up logging and initializes the superclass.
         """
-        self.sessionmaker = sessionmaker(create_async_engine(f'{config.database.db_driver}://{config.database.connection_url}'), class_=AsyncSession)
+        self.sessionmaker = sessionmaker(
+            create_async_engine(
+                f"{config.database.db_driver}://{config.database.connection_url}"
+            ),
+            class_=AsyncSession,
+        )
         self.guild_prefix_cache = {}
 
         intents = discord.Intents.all()
@@ -66,23 +71,22 @@ class Bot(commands.Bot):
         if message.guild.id in self.guild_prefix_cache.keys():
             prefix = self.guild_prefix_cache[message.guild.id]
         else:
-             async with self.session as session:
+            async with self.session as session:
                 result = await session.execute(
-                    select(Guild)
-                        .where(Guild.id == int(message.guild.id))
+                    select(Guild).where(Guild.id == int(message.guild.id))
                 )
                 guild = result.scalars().first()
                 if not guild:
                     await session.execute(
-                        insert(Guild)
-                            .values(id=message.guild.id, prefix=config.default_prefix)
+                        insert(Guild).values(
+                            id=message.guild.id, prefix=config.default_prefix
+                        )
                     )
                     await session.commit()
                     prefix = config.default_prefix
                 else:
                     prefix = guild.prefix
         return commands.when_mentioned_or(prefix)(self, message)
-        
 
     @property
     def session(self) -> AsyncSession:

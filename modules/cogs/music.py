@@ -1,3 +1,76 @@
+"""
+Class Documentation: Music Cog
+
+The Music class is a Discord bot cog that provides music playback functionality. It includes commands for controlling music playback in a Discord server.
+
+Class Methods:
+
+1. __init__(self, bot)
+   Initializes the Music cog with a reference to the bot instance.
+   - bot: The instance of the bot that the cog is a part of.
+
+2. stop(self, ctx: commands.Context)
+   Stops music playback and clears the queue.
+   - ctx: The context of the command, which includes information about the command invocation.
+
+3. shuffle(self, ctx: commands.Context)
+   Shuffles the current music queue.
+   - ctx: The context of the command.
+
+4. play(self, ctx: commands.Context, *, query: str)
+   Plays a song based on a given query.
+   - ctx: The context of the command.
+   - query: A search term or URL to find and play music.
+
+5. skip(self, ctx: commands.Context)
+   Skips the current song in the queue.
+   - ctx: The context of the command.
+
+6. pause(self, ctx: commands.Context)
+   Pauses or resumes the current song.
+   - ctx: The context of the command.
+
+7. leave(self, ctx: commands.Context)
+   Disconnects the bot from the voice channel.
+   - ctx: The context of the command.
+
+8. nightcore(self, ctx: commands.Context)
+   Applies a nightcore filter to the music.
+   - ctx: The context of the command.
+
+9. normal(self, ctx: commands.Context)
+   Resets any active music filters to normal.
+   - ctx: The context of the command.
+
+10. queue(self, ctx: commands.Context)
+    Displays the current music queue.
+    - ctx: The context of the command.
+
+11. nowplaying(self, ctx: commands.Context)
+    Shows information about the currently playing song.
+    - ctx: The context of the command.
+
+12. autoplay(self, ctx: commands.Context, *, autoplay_mode: str)
+    Sets the autoplay mode for the bot.
+    - ctx: The context of the command.
+    - autoplay_mode: A string representing the autoplay mode. Valid modes include 'enabled', 'partial', 'disabled'.
+
+13. volume(self, ctx: commands.Context, volume: float)
+    Changes the player's volume.
+    - ctx: The context of the command.
+    - volume: A float representing the new volume level, with valid values between 0 and 1.
+
+14. loop(self, ctx: commands.Context, loop_mode: str)
+    Changes the player's loop mode.
+    - ctx: The context of the command.
+    - loop_mode: A string representing the loop mode. Valid modes are 'normal', 'loop', 'loop_all'.
+
+Additional Notes:
+- The Music cog integrates with the wavelink library for music playback and control.
+- It uses various commands to manage music in a voice channel, such as playing, pausing, skipping, and adjusting volume.
+- The cog also supports more advanced features like shuffling the queue, setting autoplay modes, and applying audio filters.
+- The cog is designed to be added to a discord.ext.commands.Bot or discord.ext.commands.AutoShardedBot instance for use in a Discord bot application.
+"""
 import random
 from typing import cast
 import discord
@@ -6,7 +79,7 @@ import wavelink
 from discord.ext import commands
 
 from modules.globals import config
-from utils import create_track_embed, milliseconds_to_mm_ss
+from modules.utils._text_utils import create_track_embed, milliseconds_to_mm_ss
 
 # TODO: Make player.queue write to a database to allow seamless bot restarts without losing current music queue
 
@@ -15,7 +88,8 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="stop")
+    #playback commands
+    @commands.hybrid_command(name="stop", aliases=["clear", "stopplaying"])
     async def stop(self, ctx: commands.Context):
         """
         Stops the music playback and clears the queue.
@@ -31,7 +105,7 @@ class Music(commands.Cog):
         await player.seek(player.current.length)
         await ctx.message.add_reaction(f"{config.emoji.success}")
 
-    @commands.hybrid_command(name="shuffle")
+    @commands.hybrid_command(name="shuffle", aliases=["randomize", "random"])
     async def shuffle(self, ctx: commands.Context):
         """
         Shuffles the music queue.
@@ -45,7 +119,7 @@ class Music(commands.Cog):
         player.queue.shuffle()
         await ctx.message.add_reaction(f"{config.emoji.success}")
 
-    @commands.hybrid_command(name="play", alias=["p"])
+    @commands.hybrid_command(name="play", aliases=["p", "add", "enqueue", "addsong"])
     async def play(self, ctx: commands.Context, *, query: str) -> None:
         """
         Plays a song based on the given query. The query can be a URL or a search term.
@@ -115,7 +189,7 @@ class Music(commands.Cog):
         if not player.playing:
             await player.play(player.queue.get(), volume=30)
 
-    @commands.hybrid_command(name="skip")
+    @commands.hybrid_command(name="skip", aliases=["next", "fs", "forceskip"])
     async def skip(self, ctx: commands.Context) -> None:
         """
         Skips the current song in the queue.
@@ -149,7 +223,7 @@ class Music(commands.Cog):
         else:
             await ctx.send("The bot is not connected to a voice channel.")
 
-    @commands.hybrid_command(name="leave")
+    @commands.hybrid_command(name="leave", aliases=["disconnect", "dc"])
     async def leave(self, ctx: commands.Context) -> None:
         """
         Disconnects the player from the voice channel.
@@ -163,39 +237,7 @@ class Music(commands.Cog):
         await player.disconnect()
         await ctx.message.add_reaction(f"{config.emoji.success}")
 
-    @commands.hybrid_command(name="nightcore")
-    async def nightcore(self, ctx: commands.Context) -> None:
-        """
-        Sets the music filter to a nightcore style.
-        """
-        player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
-        if not player:
-            await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{config.emoji.fail}")
-            return
-
-        filters: wavelink.Filters = player.filters
-        filters.timescale.set(pitch=1.2, speed=1.2, rate=1)
-        await player.set_filters(filters)
-        await ctx.message.add_reaction(f"{config.emoji.success}")
-
-    @commands.hybrid_command()
-    async def normal(self, ctx: commands.Context) -> None:
-        """
-        Resets the music filter to normal, removing any active filters.
-        """
-        player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
-        if not player:
-            await ctx.send("The bot is not connected to a voice channel")
-            await ctx.message.add_reaction(f"{config.emoji.fail}")
-            return
-
-        filters: wavelink.Filters = player.filters
-        filters.reset()
-        await player.set_filters(filters)
-        await ctx.message.add_reaction(f"{config.emoji.success}")
-
-    @commands.hybrid_command(name="queue")
+    @commands.hybrid_command(name="queue", aliases=["q", "next", "upnext"])
     async def queue(self, ctx: commands.Context) -> None:
         """
         Displays the current music queue.
@@ -227,7 +269,7 @@ class Music(commands.Cog):
             await ctx.send("Queue is empty. Try adding some music to it")
             await ctx.message.add_reaction(f"{config.emoji.fail}")
 
-    @commands.hybrid_command(name="np")
+    @commands.hybrid_command(name="np", aliases=["nowplaying", "current", "currentsong"])
     async def nowplaying(self, ctx: commands.Context) -> None:
         """
         Shows information about the currently playing song.
@@ -247,7 +289,7 @@ class Music(commands.Cog):
         )
         await player.home.send(embed=embed)
 
-    @commands.hybrid_command(name="autoplay")
+    @commands.hybrid_command(name="autoplay", aliases=["ap", "autopl"])
     async def autoplay(self, ctx: commands.Context, *, autoplay_mode: str) -> None:
         """
         Sets the autoplay mode for the bot. Use p!help autoplay to see modes.
@@ -278,7 +320,7 @@ class Music(commands.Cog):
             )
             await ctx.message.add_reaction(f"{config.emoji.fail}")
 
-    @commands.hybrid_command(name="volume")
+    @commands.hybrid_command(name="volume", aliases=["vol"])
     async def volume(self, ctx: commands.Context, volume: float) -> None:
         """
         Changes the player's volume.
@@ -306,7 +348,7 @@ class Music(commands.Cog):
         player.set_volume(volume)
         await ctx.message.add_reaction(f"{config.emoji.success}")
 
-    @commands.hybrid_command(name="loop")
+    @commands.hybrid_command(name="loop", aliases=["repeat"])
     async def loop(self, ctx: commands.Context, loop_mode: str) -> None:
         """
         Changes the player's loop mode. Use p!help loop to see modes.
@@ -341,3 +383,51 @@ class Music(commands.Cog):
             )
             await ctx.message.add_reaction(f"{config.emoji.fail}")
             return
+        
+    @commands.hybrid_command(name="nightcore")
+    async def nightcore(self, ctx: commands.Context) -> None:
+        """
+        Sets the music filter to a nightcore style.
+        """
+        player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+        if not player:
+            await ctx.send("The bot is not connected to a voice channel")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
+            return
+
+        filters: wavelink.Filters = player.filters
+        filters.timescale.set(pitch=1.2, speed=1.2, rate=1)
+        await player.set_filters(filters)
+        await ctx.message.add_reaction(f"{config.emoji.success}")
+
+    @commands.hybrid_command(name="normal", aliases=["removefilter", "nofilter", "resetfilters", "reset"])
+    async def normal(self, ctx: commands.Context) -> None:
+        """
+        Resets the music filter to normal, removing any active filters.
+        """
+        player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+        if not player:
+            await ctx.send("The bot is not connected to a voice channel")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
+            return
+
+        filters: wavelink.Filters = player.filters
+        filters.reset()
+        await player.set_filters(filters)
+        await ctx.message.add_reaction(f"{config.emoji.success}")
+
+    @commands.hybrid_command(name="nightcore")
+    async def nightcore(self, ctx: commands.Context) -> None:
+        """
+        Sets the music filter to a nightcore style.
+        """
+        player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+        if not player:
+            await ctx.send("The bot is not connected to a voice channel")
+            await ctx.message.add_reaction(f"{config.emoji.fail}")
+            return
+
+        filters: wavelink.Filters = player.filters
+        filters.timescale.set(pitch=1.2, speed=1.2, rate=1)
+        await player.set_filters(filters)
+        await ctx.message.add_reaction(f"{config.emoji.success}")

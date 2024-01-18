@@ -20,3 +20,4 @@ v1.0.0 Is out!
   - SPOTIFY_CLIENT_SECRET: Get one from [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) after creating a new application.
 - To run the bot, after all environment variables have been set up. Run `docker compose up --build` (add `-d` if you wish to run it dettached)
 - If you do not wish to run lavalink locally, you can also run `docker compose up penguintunes --build` (add `-d` if you wish to run it dettached)
+- Documentation is mostly AI Generated. If there any egregious errors in it, please open an Issue
