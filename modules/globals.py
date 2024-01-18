@@ -56,7 +56,7 @@ config.database.db_host = os.getenv("DB_HOST")
 config.database.db_port = os.getenv("DB_PORT")
 config.database.db_database = os.getenv("DB_DATABASE")
 config.database.connection_url = f"{config.database.db_username}:{config.database.db_password}@{config.database.db_host}:{config.database.db_port}/{config.database.db_database}"
-config.database.db_driver = "mysql+aiomysql"
+config.database.db_driver = "mysql+asyncmy"
 
 config.lavalink = Section("Lavalink config section")
 config.lavalink.host = os.getenv("LAVALINK_SERVER_HOST")
