@@ -113,7 +113,8 @@ class SlotMachine:
                 if combination.count(symbol) == 1 and symbol in self.one_of_a_kind_prizes:
                     multiplier = self.one_of_a_kind_prizes.get(symbol, 0)
                     return bet_amount * multiplier
-            await self.add_jackpot(bet_amount * 0.1) #add 10% of the bet amount to the jackpot
+            await self.add_jackpot(bet_amount * (1-config.fun.house_retain)) #add 90% of the bet amount to the jackpot
+            return 0
         
     def display_prizes(self):
         table_data = [

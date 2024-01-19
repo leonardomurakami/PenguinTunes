@@ -147,3 +147,23 @@ class Fun(commands.Cog):
             embed.add_field(name=f"{emoji} - {self.bot.get_user(player.id)}", value=f"${player.balance}", inline=False)
         await ctx.send(embed=embed)
     
+    @commands.command(name="stats")
+    async def stats(self, ctx: commands.Context):
+        """
+        Sends the player stats.
+        - ctx: The context of the command.
+        """
+        async with self.bot.session as session:
+            player = await session.get(Cassino, int(ctx.author.id))
+            if not player:
+                player = Cassino(id=ctx.author.id, balance=1000)
+                session.add(player)
+                await session.commit()
+                await session.refresh(player)
+        embed = discord.Embed(title=f"{ctx.author.name}'s stats", color=discord.Color.green())
+        embed.set_thumbnail(url=ctx.author.display_avatar.url)
+        embed.add_field(name="Money won", value=f"${player.money_won}")
+        embed.add_field(name="Money lost", value=f"${player.money_lost}")
+        embed.add_field(name="Slot wins", value=f"${player.slot_wins}")
+        embed.add_field(name="Blackjack wins", value=f"${player.blackjack_wins}")
+        await ctx.send(embed=embed)

@@ -126,7 +126,7 @@ class CassinoButton(discord.ui.Button):
             await interaction.response.send_message("You don't have enough money to bet that amount!", ephemeral=True)
             return
         machine_result = self.view.slot_machine.spin()    
-        prize = self.view.slot_machine.calculate_prize(machine_result, self.view.cassino_player.bet)
+        prize = await self.view.slot_machine.calculate_prize(machine_result, self.view.cassino_player.bet)
 
         content = " ".join(machine_result)
         if prize != 0:
@@ -157,8 +157,8 @@ class CassinoButton(discord.ui.Button):
         await interaction.response.edit_message(view=self.view)
 
     async def decrease_bet(self, interaction: discord.Interaction):
-        if self.view.bet_multiplier == 0:
-            await interaction.response.send_message("You can't bet less than $1!", ephemeral=True)
+        if self.view.bet_multiplier == 1:
+            await interaction.response.send_message("You can't bet less than $10!", ephemeral=True)
             return
         self.view.bet_multiplier -= 1
         self.view.cassino_player.bet /= 10
