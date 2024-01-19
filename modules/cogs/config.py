@@ -105,7 +105,7 @@ class Config(commands.Cog):
                 if not command_db:
                     if not ctx.channel.guild.id in self.bot.restricted_commands_cache.keys():
                         self.bot.restricted_commands_cache[ctx.channel.guild.id] = {}
-                    self.bot.restricted_commands_cache[ctx.channel.guild.id] = ctx.channel.id
+                    self.bot.restricted_commands_cache[ctx.channel.guild.id][command] = ctx.channel.id
                     command_db = RestrictedCommands(command_id=f"{str(ctx.guild.id)}_{command}", channel=ctx.channel.id)
                     session.add(command_db)
                     await session.commit()
