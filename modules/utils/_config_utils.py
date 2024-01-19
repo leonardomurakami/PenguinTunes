@@ -40,6 +40,12 @@ Class Methods:
 """
 
 
+from sqlalchemy import select
+
+from modules.orm.database import RestrictedCommands
+from discord.ext import commands
+
+
 class Struct(object):
     def __init__(self, *args):
         """
@@ -93,3 +99,39 @@ class Struct(object):
         return len(
             [k for k in ks if not k.startswith("__") and not isinstance(k, Struct)]
         )
+
+
+async def allowed_on_channel(command: str, bot: commands.Bot, ctx: commands.Context):
+    """
+    Check if command can be run in this channel. First checking if command is in bot.restricted_commands_cache, if not, then checking database.
+    """
+    if ctx.channel.guild.id in bot.restricted_commands_cache.keys():
+        if command in bot.restricted_commands_cache[ctx.channel.guild.id].keys():
+            if (
+                bot.restricted_commands_cache[ctx.channel.guild.id][command] == ctx.channel.id or 
+                not bot.restricted_commands_cache[ctx.channel.guild.id][command]
+            ):
+                return True
+            else:
+                await ctx.send(f"This command is restricted to <#{bot.restricted_commands_cache[ctx.channel.guild.id][command]}> in this guild.", ephemeral=True, delete_after=10)
+                return False
+    else:
+        bot.restricted_commands_cache[ctx.channel.guild.id] = {}
+            
+    async with bot.session as session:
+        result = await session.execute(
+            select(RestrictedCommands).where(
+                RestrictedCommands.command_id == f"{str(ctx.channel.guild.id)}_{command}"
+            )
+        )
+        command = result.scalars().first()
+        if not command:
+            bot.restricted_commands_cache[ctx.channel.guild.id][command] = None
+            return True
+        else:
+            bot.restricted_commands_cache[ctx.channel.guild.id][command] = command.channel
+            if command.channel == ctx.channel.id:
+                return True
+            else:
+                await ctx.send(f"This command is restricted to <#{bot.restricted_commands_cache[ctx.channel.guild.id][command]}> in this guild.", ephemeral=True, delete_after=10)
+                return False

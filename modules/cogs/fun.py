@@ -29,10 +29,12 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands
 from sqlalchemy import select
+
 from modules.globals import config
 from modules.orm.database import Cassino
 from modules.player.cassino import SlotMachine
 from modules.views.fun import CassinoView
+from modules.utils._config_utils import allowed_on_channel
 
 
 class Fun(commands.Cog):
@@ -46,6 +48,10 @@ class Fun(commands.Cog):
         - ctx: The context of the command.
         - quote: A string representing the quote to be added to the image. If a Discord user is mentioned, their avatar is added to the image.
         """
+        restricted = await allowed_on_channel("sisyphus", self.bot, ctx)
+        if not restricted:
+            return
+        
         base_image = Image.open(config.fun.sisyphus_image_path)
         font = ImageFont.truetype(config.fun.font_path, config.fun.font_size)
         if quote:
@@ -74,6 +80,10 @@ class Fun(commands.Cog):
         Creates a cassino instance. All should be controlled by the view and buttons.
         - ctx: The context of the command.
         """
+        restricted = await allowed_on_channel("cassino", self.bot, ctx)
+        if not restricted:
+            return
+        
         await ctx.send(view=CassinoView(member=ctx.author))
 
     @commands.command(name="jackpot")
@@ -82,6 +92,10 @@ class Fun(commands.Cog):
         Sends the current jackpot.
         - ctx: The context of the command.
         """
+        restricted = await allowed_on_channel("jackpot", self.bot, ctx)
+        if not restricted:
+            return
+        
         slot_machine = SlotMachine()
         jackpot = await slot_machine.get_jackpot()
         await ctx.send(f"The current jackpot is ${jackpot}\nYou can claim it by getting a {(config.emoji.cassino.diamond + ' ')*3} in the cassino slots game!\nGood luck!")
@@ -92,6 +106,10 @@ class Fun(commands.Cog):
         Sends the player current money.
         - ctx: The context of the command.
         """
+        restricted = await allowed_on_channel("money", self.bot, ctx)
+        if not restricted:
+            return
+        
         async with self.bot.session as session:
             player = await session.get(Cassino, int(ctx.author.id))
             if not player:
@@ -108,6 +126,10 @@ class Fun(commands.Cog):
         Gets 1000$ daily. Command can only be ran once a day.
         - ctx: The context of the command.
         """
+        restricted = await allowed_on_channel("daily", self.bot, ctx)
+        if not restricted:
+            return
+        
         async with self.bot.session as session:
             player = await session.get(Cassino, int(ctx.author.id))
             if not player:
@@ -134,12 +156,16 @@ class Fun(commands.Cog):
             await session.refresh(player)
         await ctx.send(f"You claimed your daily! You now have ${player.balance}")
 
-    @commands.command(name="leaderboard", aliases=["top"])
+    @commands.command(name="top", aliases=["leaderboard"])
     async def leaderboard(self, ctx: commands.Context):
         """
         Sends the leaderboard.
         - ctx: The context of the command.
         """
+        restricted = await allowed_on_channel("top", self.bot, ctx)
+        if not restricted:
+            return
+        
         async with self.bot.session as session:
             players = await session.execute(select(Cassino).order_by(Cassino.balance.desc()).limit(10))
             players = players.scalars().all()
@@ -154,6 +180,10 @@ class Fun(commands.Cog):
         Sends the player stats.
         - ctx: The context of the command.
         """
+        restricted = await allowed_on_channel("stats", self.bot, ctx)
+        if not restricted:
+            return
+        
         async with self.bot.session as session:
             player = await session.get(Cassino, int(ctx.author.id))
             if not player:

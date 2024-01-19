@@ -80,6 +80,7 @@ from discord.ext import commands
 
 from modules.globals import config
 from modules.utils._text_utils import create_track_embed, milliseconds_to_mm_ss
+from modules.utils._config_utils import allowed_on_channel
 
 # TODO: Make player.queue write to a database to allow seamless bot restarts without losing current music queue
 
@@ -94,6 +95,10 @@ class Music(commands.Cog):
         """
         Stops the music playback and clears the queue.
         """
+        restricted = await allowed_on_channel("stop", self.bot, ctx)
+        if not restricted:
+            return
+        
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -110,6 +115,10 @@ class Music(commands.Cog):
         """
         Shuffles the music queue.
         """
+        restricted = await allowed_on_channel("shuffle", self.bot, ctx)
+        if not restricted:
+            return
+        
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -128,6 +137,10 @@ class Music(commands.Cog):
         Parameters:
         query: A string representing the search query or URL for the track.
         """
+        restricted = await allowed_on_channel("play", self.bot, ctx)
+        if not restricted:
+            return
+        
         if not ctx.guild:
             return
 
@@ -194,6 +207,10 @@ class Music(commands.Cog):
         """
         Skips the current song in the queue.
         """
+        restricted = await allowed_on_channel("skip", self.bot, ctx)
+        if not restricted:
+            return
+        
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -211,6 +228,10 @@ class Music(commands.Cog):
         """
         Toggles playback pause/resume.
         """
+        restricted = await allowed_on_channel("pause", self.bot, ctx)
+        if not restricted:
+            return
+        
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -228,6 +249,10 @@ class Music(commands.Cog):
         """
         Disconnects the player from the voice channel.
         """
+        restricted = await allowed_on_channel("leave", self.bot, ctx)
+        if not restricted:
+            return
+        
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -242,6 +267,10 @@ class Music(commands.Cog):
         """
         Displays the current music queue.
         """
+        restricted = await allowed_on_channel("queue", self.bot, ctx)
+        if not restricted:
+            return
+
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -274,6 +303,10 @@ class Music(commands.Cog):
         """
         Shows information about the currently playing song.
         """
+        restricted = await allowed_on_channel("np", self.bot, ctx)
+        if not restricted:
+            return
+
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -297,6 +330,10 @@ class Music(commands.Cog):
         Parameters:
         autoplay_mode: A string representing the autoplay mode. 'enabled', 'partial', 'disabled'.
         """
+        restricted = await allowed_on_channel("autoplay", self.bot, ctx)
+        if not restricted:
+            return
+
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -328,6 +365,10 @@ class Music(commands.Cog):
         Parameters:
         volume: An integer or float representing the new volume level.
         """
+        restricted = await allowed_on_channel("volume", self.bot, ctx)
+        if not restricted:
+            return
+
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -356,6 +397,10 @@ class Music(commands.Cog):
         Parameters:
         loop_mode: A string representing the loop mode. Valid modes: 'normal', 'loop', 'loop_all'
         """
+        restricted = await allowed_on_channel("loop", self.bot, ctx)
+        if not restricted:
+            return
+
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -389,6 +434,10 @@ class Music(commands.Cog):
         """
         Sets the music filter to a nightcore style.
         """
+        restricted = await allowed_on_channel("nightcore", self.bot, ctx)
+        if not restricted:
+            return
+
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -405,6 +454,10 @@ class Music(commands.Cog):
         """
         Resets the music filter to normal, removing any active filters.
         """
+        restricted = await allowed_on_channel("normal", self.bot, ctx)
+        if not restricted:
+            return
+
         player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
         if not player:
             await ctx.send("The bot is not connected to a voice channel")
@@ -415,3 +468,4 @@ class Music(commands.Cog):
         filters.reset()
         await player.set_filters(filters)
         await ctx.message.add_reaction(f"{config.emoji.success}")
+

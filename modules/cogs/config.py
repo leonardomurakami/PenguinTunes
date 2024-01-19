@@ -35,7 +35,7 @@ from discord.ext import commands
 from sqlalchemy import select, update
 
 from modules.globals import config
-from modules.orm.database import Guild
+from modules.orm.database import Guild, RestrictedCommands
 
 
 class Config(commands.Cog):
@@ -91,3 +91,26 @@ class Config(commands.Cog):
 
                 await session.commit()
                 await ctx.send(f"Changing prefix to {new_prefix}")
+
+    @commands.hybrid_command(name="restrict", aliases=["restrict-command"])
+    @commands.has_permissions(manage_messages=True)
+    async def restrict(self, ctx: commands.Context, *, command: str):
+        """
+        Restricts a command to the channel the commands was used.
+        """
+        if (bot_command := self.bot.get_command(command)):
+            command = bot_command.name #ensure name is picked, not alias
+            async with self.bot.session as session:
+                command_db = await session.get(RestrictedCommands, f"{str(ctx.guild.id)}_{command}")
+                if not command_db:
+                    command_db = RestrictedCommands(command_id=f"{str(ctx.guild.id)}_{command}", channel=ctx.channel.id)
+                    session.add(command_db)
+                    await session.commit()
+                    await session.refresh(command_db)
+                else:
+                    command_db.channel = ctx.channel.id
+                    await session.commit()
+                    await session.refresh(command_db)
+                await ctx.send(f"Restricted {command} to channel {ctx.channel.mention}")
+        else:
+            await ctx.send(f"{command} is not a valid command!")

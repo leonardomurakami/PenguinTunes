@@ -133,6 +133,7 @@ class CassinoButton(discord.ui.Button):
             self.view.cassino_player.db_player.balance += prize
             self.view.cassino_player.db_player.money_won += prize
             self.view.cassino_player.db_player.slot_wins += prize
+            self.view.cassino_player.db_player.money_lost += self.view.cassino_player.bet
             content += f"\nYou won ${prize}!"
         else:
             self.view.cassino_player.db_player.money_lost += self.view.cassino_player.bet

@@ -90,3 +90,16 @@ class PersistentValues(Base):
         - Returns a formatted string representation of the Guild instance, including its id and prefix.
         """
         return f"User(id={self.id!r}, name={self.name!r}, value={self.value!r})"
+    
+
+class RestrictedCommands(Base):
+    __tablename__ = "restricted_commands"
+    command_id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    channel: Mapped[int] = mapped_column(BigInteger, nullable=True, default=None)
+
+    def __repr__(self) -> str:
+        """
+        - Overrides the default representation method.
+        - Returns a formatted string representation of the Guild instance, including its id and prefix.
+        """
+        return f"User(id={self.id!r}, name={self.name!r}, value={self.value!r})"

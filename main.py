@@ -55,7 +55,8 @@ class Bot(commands.Bot):
             class_=AsyncSession,
         )
         self.guild_prefix_cache = {}
-
+        self.restricted_commands_cache = {}
+        
         intents = discord.Intents.all()
         discord.utils.setup_logging()
         super().__init__(
@@ -126,6 +127,15 @@ class Bot(commands.Bot):
         logging.info(
             "Wavelink Node connected: %s | Resumed: %s", payload.node, payload.resumed
         )
+
+    def log(self, message: str) -> None:
+        """
+        Logs a message to the console.
+
+        Args:
+            message (str): The message to log.
+        """
+        logging.info(message)
 
     async def on_wavelink_track_start(
         self, payload: wavelink.TrackStartEventPayload
