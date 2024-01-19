@@ -20,6 +20,7 @@ Additional Notes:
 - The command handles mentions in the quote by removing the mention text and optionally pasting the mentioned user's avatar onto the image.
 - The final image is sent back to the Discord channel where the command was invoked.
 """
+import datetime
 import discord
 import re
 import textwrap
@@ -27,7 +28,10 @@ import textwrap
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands
+from sqlalchemy import select
 from modules.globals import config
+from modules.orm.database import Cassino
+from modules.player.cassino import SlotMachine
 from modules.views.fun import CassinoView
 
 
@@ -71,3 +75,75 @@ class Fun(commands.Cog):
         - ctx: The context of the command.
         """
         await ctx.send(view=CassinoView(member=ctx.author))
+
+    @commands.command(name="jackpot")
+    async def jackpot(self, ctx: commands.Context):
+        """
+        Sends the current jackpot.
+        - ctx: The context of the command.
+        """
+        slot_machine = SlotMachine()
+        jackpot = await slot_machine.get_jackpot()
+        await ctx.send(f"The current jackpot is ${jackpot}\nYou can claim it by getting a {(config.emoji.cassino.diamond + ' ')*3} in the cassino slots game!\nGood luck!")
+
+    @commands.command(name="money", aliases=["balance"])
+    async def balance(self, ctx: commands.Context):
+        """
+        Sends the player current money.
+        - ctx: The context of the command.
+        """
+        async with self.bot.session as session:
+            player = await session.get(Cassino, int(ctx.author.id))
+            if not player:
+                player = Cassino(id=ctx.author.id, balance=1000)
+                session.add(player)
+                await session.commit()
+                await session.refresh(player)
+        await ctx.send(f"You have ${player.balance}")
+
+
+    @commands.command(name="daily")
+    async def daily(self, ctx: commands.Context):
+        """
+        Gets 1000$ daily. Command can only be ran once a day.
+        - ctx: The context of the command.
+        """
+        async with self.bot.session as session:
+            player = await session.get(Cassino, int(ctx.author.id))
+            if not player:
+                player = Cassino(id=ctx.author.id, balance=1000)
+                session.add(player)
+                await session.commit()
+                await session.refresh(player)
+            if player.last_daily and player.last_daily.date() == datetime.utcnow().date():
+                next_daily_time = player.last_daily + datetime.timedelta(days=1)
+                time_remaining = next_daily_time - datetime.utcnow()
+                hours, remainder = divmod(time_remaining.seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                if hours > 0:
+                    time_message = f"{hours} hours and {minutes} minutes"
+                else:
+                    time_message = f"{minutes} minutes and {seconds} seconds"
+                
+                await ctx.send(f"You already claimed your daily for today! Come back in {time_message}.")
+                return
+            player.balance += 1000
+            player.last_daily = datetime.datetime.utcnow()
+            await session.commit()
+            await session.refresh(player)
+        await ctx.send(f"You claimed your daily! You now have ${player.balance}")
+
+    @commands.command(name="leaderboard", aliases=["top"])
+    async def leaderboard(self, ctx: commands.Context):
+        """
+        Sends the leaderboard.
+        - ctx: The context of the command.
+        """
+        async with self.bot.session as session:
+            players = await session.execute(select(Cassino).order_by(Cassino.balance.desc()).limit(10))
+            players = players.scalars().all()
+        embed = discord.Embed(title="Cassino Leaderboard", color=discord.Color.green())
+        for player, emoji in zip(players, config.emoji.cassino.leaderboard):
+            embed.add_field(name=f"{emoji} - {self.bot.get_user(player.id)}", value=f"${player.balance}", inline=False)
+        await ctx.send(embed=embed)
+    

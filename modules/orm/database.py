@@ -37,7 +37,8 @@ Class Descriptions:
     - This structure allows for easy retrieval, update, and management of guild-related data in the context of a Discord bot using the SQLAlchemy ORM.
 """
 
-from sqlalchemy import String, BigInteger, Integer
+import datetime
+from sqlalchemy import DateTime, String, BigInteger, Integer
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -69,6 +70,7 @@ class Cassino(Base):
     blackjack_wins: Mapped[int] = mapped_column(Integer, default=0)
     money_won: Mapped[int] = mapped_column(Integer, default=0)
     money_lost: Mapped[int] = mapped_column(Integer, default=0)
+    last_daily: Mapped[datetime.datetime] = mapped_column(DateTime, default=None)
 
     def __repr__(self) -> str:
         """
@@ -76,3 +78,15 @@ class Cassino(Base):
         - Returns a formatted string representation of the Guild instance, including its id and prefix.
         """
         return f"User(id={self.id!r}, money={self.balance!r}, slot_wins={self.slot_wins!r}, blackjack_wins={self.blackjack_wins!r}, money_won={self.money_won!r}, money_lost={self.money_lost!r})"
+
+class PersistentValues(Base):
+    __tablename__ = "persistent_values"
+    name: Mapped[str] = mapped_column(String(30), primary_key=True)
+    value: Mapped[int] = mapped_column(Integer, default=0)
+
+    def __repr__(self) -> str:
+        """
+        - Overrides the default representation method.
+        - Returns a formatted string representation of the Guild instance, including its id and prefix.
+        """
+        return f"User(id={self.id!r}, name={self.name!r}, value={self.value!r})"

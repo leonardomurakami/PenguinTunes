@@ -93,6 +93,20 @@ config.emoji.av_emoji.mobile = "\U0001F4F6"
 config.emoji.av_emoji.play = "\u25b6\ufe0f"
 config.emoji.av_emoji.pause = "\u23f8\ufe0f"
 
+config.emoji.alphanumeric = Section("Emojis for alphanumeric")
+config.emoji.alphanumeric.zero = "\u0030\ufe0f\u20e3"
+config.emoji.alphanumeric.one = "\u0031\ufe0f\u20e3"
+config.emoji.alphanumeric.two = "\u0032\ufe0f\u20e3"
+config.emoji.alphanumeric.three = "\u0033\ufe0f\u20e3"
+config.emoji.alphanumeric.four = "\u0034\ufe0f\u20e3"
+config.emoji.alphanumeric.five = "\u0035\ufe0f\u20e3"
+config.emoji.alphanumeric.six = "\u0036\ufe0f\u20e3"
+config.emoji.alphanumeric.seven = "\u0037\ufe0f\u20e3"
+config.emoji.alphanumeric.eight = "\u0038\ufe0f\u20e3"
+config.emoji.alphanumeric.nine = "\u0039\ufe0f\u20e3"
+config.emoji.alphanumeric.ten = "\U0001f51f"
+config.emoji.alphanumeric.star = "\u2b50"
+
 config.emoji.cassino = Section("Emojis for cassino")
 config.emoji.cassino.diamond = "\U0001F48E"
 config.emoji.cassino.cherry = "\U0001F352"
@@ -102,3 +116,15 @@ config.emoji.cassino.apple = "\U0001F34E"
 config.emoji.cassino.grapes = "\U0001F347"
 config.emoji.cassino.banana = "\U0001F34C"
 config.emoji.cassino.slots = "\U0001F3B0"
+config.emoji.cassino.leaderboard = [
+   config.emoji.alphanumeric.star,
+   config.emoji.alphanumeric.two,
+   config.emoji.alphanumeric.three, 
+   config.emoji.alphanumeric.four, 
+   config.emoji.alphanumeric.five, 
+   config.emoji.alphanumeric.six, 
+   config.emoji.alphanumeric.seven, 
+   config.emoji.alphanumeric.eight, 
+   config.emoji.alphanumeric.nine,
+   config.emoji.alphanumeric.ten
+]
