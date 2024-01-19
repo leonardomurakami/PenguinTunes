@@ -115,9 +115,10 @@ class Fun(commands.Cog):
                 session.add(player)
                 await session.commit()
                 await session.refresh(player)
-            if player.last_daily and player.last_daily.date() == datetime.utcnow().date():
+            if player.last_daily and player.last_daily.date() == datetime.datetime.now(datetime.timezone.utc).date():
                 next_daily_time = player.last_daily + datetime.timedelta(days=1)
-                time_remaining = next_daily_time - datetime.utcnow()
+                aware_last_daily = next_daily_time.replace(tzinfo=datetime.timezone.utc)
+                time_remaining = aware_last_daily - datetime.datetime.now(datetime.timezone.utc)
                 hours, remainder = divmod(time_remaining.seconds, 3600)
                 minutes, seconds = divmod(remainder, 60)
                 if hours > 0:
@@ -128,7 +129,7 @@ class Fun(commands.Cog):
                 await ctx.send(f"You already claimed your daily for today! Come back in {time_message}.")
                 return
             player.balance += 1000
-            player.last_daily = datetime.datetime.utcnow()
+            player.last_daily = datetime.datetime.now(datetime.timezone.utc)
             await session.commit()
             await session.refresh(player)
         await ctx.send(f"You claimed your daily! You now have ${player.balance}")
@@ -162,6 +163,7 @@ class Fun(commands.Cog):
                 await session.refresh(player)
         embed = discord.Embed(title=f"{ctx.author.name}'s stats", color=discord.Color.green())
         embed.set_thumbnail(url=ctx.author.display_avatar.url)
+        embed.add_field(name="Balance", value=f"${player.balance}")
         embed.add_field(name="Money won", value=f"${player.money_won}")
         embed.add_field(name="Money lost", value=f"${player.money_lost}")
         embed.add_field(name="Slot wins", value=f"${player.slot_wins}")
