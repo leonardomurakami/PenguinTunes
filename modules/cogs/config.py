@@ -103,11 +103,17 @@ class Config(commands.Cog):
             async with self.bot.session as session:
                 command_db = await session.get(RestrictedCommands, f"{str(ctx.guild.id)}_{command}")
                 if not command_db:
+                    if not ctx.channel.guild.id in self.bot.restricted_commands_cache.keys():
+                        self.bot.restricted_commands_cache[ctx.channel.guild.id] = {}
+                    self.bot.restricted_commands_cache[ctx.channel.guild.id] = ctx.channel.id
                     command_db = RestrictedCommands(command_id=f"{str(ctx.guild.id)}_{command}", channel=ctx.channel.id)
                     session.add(command_db)
                     await session.commit()
                     await session.refresh(command_db)
                 else:
+                    if not ctx.channel.guild.id in self.bot.restricted_commands_cache.keys():
+                        self.bot.restricted_commands_cache[ctx.channel.guild.id] = {}
+                    self.bot.restricted_commands_cache[ctx.channel.guild.id][command] = ctx.channel.id
                     command_db.channel = ctx.channel.id
                     await session.commit()
                     await session.refresh(command_db)
