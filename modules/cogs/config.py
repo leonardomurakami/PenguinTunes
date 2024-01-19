@@ -119,4 +119,4 @@ class Config(commands.Cog):
                     await session.refresh(command_db)
                 await ctx.send(f"Restricted {command} to channel {ctx.channel.mention}")
         else:
-            await ctx.send(f"{command} is not a valid command!")
+            await ctx.send(f"{command} is not a valid command!", ephemeral=True, delete_after=10)

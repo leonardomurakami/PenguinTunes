@@ -114,6 +114,7 @@ async def allowed_on_channel(command: str, bot: commands.Bot, ctx: commands.Cont
                 return True
             else:
                 await ctx.send(f"This command is restricted to <#{bot.restricted_commands_cache[ctx.channel.guild.id][command]}> in this guild.", ephemeral=True, delete_after=10)
+                await ctx.message.delete(delay=10)
                 return False
     else:
         bot.restricted_commands_cache[ctx.channel.guild.id] = {}
@@ -134,4 +135,5 @@ async def allowed_on_channel(command: str, bot: commands.Bot, ctx: commands.Cont
                 return True
             else:
                 await ctx.send(f"This command is restricted to <#{bot.restricted_commands_cache[ctx.channel.guild.id][command]}> in this guild.", ephemeral=True, delete_after=10)
+                await ctx.message.delete(delay=10)
                 return False
