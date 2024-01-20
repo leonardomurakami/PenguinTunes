@@ -77,9 +77,7 @@ class CassinoPlayer:
     def add_to_hand(self, card):
         self.hand.append(card)
 
-    
 
-    
 class SlotMachine:
     def __init__(self) -> None:
         self.sessionmaker = sessionmaker(
@@ -211,7 +209,7 @@ class BlackjackDealer:
 
     @staticmethod
     def display(hand: list, dealer: bool, force_display: bool = False):
-        if dealer and len(hand) == 2:
+        if dealer and len(hand) == 2 and not force_display:
             return f"[{hand[0]['rank']}{hand[0]['suit']}] [?{hand[0]['suit']}]"
         return ' '.join([f"[{card['rank']}{card['suit']}]" for card in hand])
 
