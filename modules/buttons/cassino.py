@@ -369,5 +369,5 @@ class BlackjackButton(discord.ui.Button):
 
     def display(self, force_display=False):
         content = f"Your hand: {self.view.blackjack_dealer.display(self.view.cassino_player.hand, dealer=False, force_display=force_display)} => {self.view.cassino_player.hand_value}\n"
-        content += f"Dealers Hand: {self.view.blackjack_dealer.display(self.view.blackjack_dealer.hand, dealer=True, force_display=force_display)} => {self.view.blackjack_dealer.hand_value}"
+        content += f"Dealers Hand: {self.view.blackjack_dealer.display(self.view.blackjack_dealer.hand, dealer=True, force_display=force_display)}"
         return content
