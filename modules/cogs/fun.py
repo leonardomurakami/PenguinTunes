@@ -54,10 +54,15 @@ class Fun(commands.Cog):
         
         base_image = Image.open(config.fun.sisyphus_image_path)
         font = ImageFont.truetype(config.fun.font_path, config.fun.font_size)
+        if ctx.message.role_mentions:
+            for role in ctx.message.role_mentions:
+                quote = quote.replace(
+                    f"<@&{role.id}>", f"@{role.name}"
+                )
         if quote:
             draw = ImageDraw.Draw(base_image)
             text_position = (50, base_image.height // 2)
-            wrapped_text = textwrap.fill(re.sub(r"<@\d+>", "", quote).strip(), width=40)
+            wrapped_text = textwrap.fill(re.sub(r"<[^>]+>", "", quote).strip(), width=40)
             draw.multiline_text(text_position, wrapped_text, fill=(0, 0, 0), font=font)
 
         if mention_list := ctx.message.mentions:
