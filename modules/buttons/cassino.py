@@ -246,6 +246,7 @@ class BlackjackButton(discord.ui.Button):
         
         content = self.display()
         self.enable_play_buttons()
+        self.disable_start_button()
         self.disable_bet_buttons()
         self.view.cassino_player.db_player.balance -= self.view.bet
         self.view.cassino_player.db_player.money_lost += self.view.bet
@@ -259,6 +260,7 @@ class BlackjackButton(discord.ui.Button):
             content += "\nYou bust!"
             content += f"\nYou lost ${self.view.bet}!"
             self.enable_bet_buttons()
+            self.enable_start_button()
             self.disable_play_buttons()
             self.view.cassino_player.db_player.balance += self.view.bet*2
             self.view.cassino_player.db_player.money_won += self.view.bet*2
@@ -297,6 +299,7 @@ class BlackjackButton(discord.ui.Button):
             self.view.cassino_player.db_player.blackjack_wins += self.view.bet
             await self.view.cassino_player.update(self.view.cassino_player.db_player)
         self.enable_bet_buttons()
+        self.enable_start_button()
         self.disable_play_buttons()
         await interaction.response.edit_message(content=content, view=self.view)
 
@@ -336,12 +339,12 @@ class BlackjackButton(discord.ui.Button):
 
     def disable_play_buttons(self):
         for item in self.view.children:
-            if isinstance(item, BlackjackButton) and item.action in ["hit", "stand", "start"]:
+            if isinstance(item, BlackjackButton) and item.action in ["hit", "stand"]:
                 item.disabled = True
     
     def enable_play_buttons(self):
         for item in self.view.children:
-            if isinstance(item, BlackjackButton) and item.action in ["hit", "stand", "start"]:
+            if isinstance(item, BlackjackButton) and item.action in ["hit", "stand"]:
                 item.disabled = False
 
     def disable_bet_buttons(self):
@@ -352,6 +355,16 @@ class BlackjackButton(discord.ui.Button):
     def enable_bet_buttons(self):
         for item in self.view.children:
             if isinstance(item, BlackjackButton) and "bet" in item.action:
+                item.disabled = False
+
+    def disable_start_button(self):
+        for item in self.view.children:
+            if isinstance(item, BlackjackButton) and item.action == "start":
+                item.disabled = True
+    
+    def enable_start_button(self):
+        for item in self.view.children:
+            if isinstance(item, BlackjackButton) and item.action == "start":
                 item.disabled = False
 
     def display(self, force_display=False):
