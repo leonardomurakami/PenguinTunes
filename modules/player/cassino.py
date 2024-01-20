@@ -266,7 +266,7 @@ class BlackjackDealer:
         plays = ""
         while self.hand_value < 17:
             card = self.deal_card()
-            plays += f"Dealer got {card['suit']}{card['rank']}\n"
+            plays += f"Dealer got {card['rank']}{card['suit']}\n"
             self.add_to_hand(card)
         return plays
     
