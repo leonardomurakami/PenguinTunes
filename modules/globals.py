@@ -129,3 +129,9 @@ config.emoji.cassino.leaderboard = [
    config.emoji.alphanumeric.nine,
    config.emoji.alphanumeric.ten
 ]
+
+config.emoji.cassino.blackjack = Section("Emojis for blackjack")
+config.emoji.cassino.blackjack.spades = "\U00002660\ufe0f"
+config.emoji.cassino.blackjack.hearts = "\U00002665\ufe0f"
+config.emoji.cassino.blackjack.clubs = "\U00002663\ufe0f"
+config.emoji.cassino.blackjack.diamonds = "\U00002666\ufe0f"
