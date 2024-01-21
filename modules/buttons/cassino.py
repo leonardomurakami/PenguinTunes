@@ -218,6 +218,8 @@ class BlackjackButton(discord.ui.Button):
             await self.start(interaction)
         elif self.action == "stand":
             await self.stand(interaction)
+        elif self.action == "double":
+            await self.double(interaction)
         elif self.action == "back":
             await self.back(interaction)
         elif self.action == "increase_bet":
@@ -245,11 +247,14 @@ class BlackjackButton(discord.ui.Button):
         self.view.blackjack_dealer.add_to_hand(self.view.blackjack_dealer.deal_card())
         
         content = self.display()
+        
         self.enable_play_buttons()
         self.disable_start_button()
         self.disable_bet_buttons()
+
         self.view.cassino_player.db_player.balance -= self.view.bet
         self.view.cassino_player.db_player.money_lost += self.view.bet
+        
         await self.view.cassino_player.update(self.view.cassino_player.db_player)
         await interaction.response.edit_message(content=content, view=self.view)
 
@@ -259,48 +264,54 @@ class BlackjackButton(discord.ui.Button):
         if self.view.cassino_player.bust:
             content += "\nYou bust!"
             content += f"\nYou lost ${self.view.bet}!"
+            
+            self.update_player_stats()
+            
             self.enable_bet_buttons()
             self.enable_start_button()
             self.disable_play_buttons()
-            self.view.cassino_player.db_player.balance += self.view.bet*2
-            self.view.cassino_player.db_player.money_won += self.view.bet*2
-            self.view.cassino_player.db_player.blackjack_wins += self.view.bet*2
-            await self.view.cassino_player.update(self.view.cassino_player.db_player)
-            await interaction.response.edit_message(content=content, view=self.view)
-            return
         await interaction.response.edit_message(content=content, view=self.view)
+
 
     async def stand(self, interaction: discord.Interaction):
         plays = self.view.blackjack_dealer.play()
         content = self.display(force_display=True)
         content += f"\n{plays}"
-        if self.view.blackjack_dealer.bust:
-            content += "\nThe dealer busts!"
-            content += f"\nYou won ${self.view.bet}!"
-            self.view.cassino_player.db_player.balance += self.view.bet*2
-            self.view.cassino_player.db_player.money_won += self.view.bet*2
-            self.view.cassino_player.db_player.blackjack_wins += self.view.bet*2
-            await self.view.cassino_player.update(self.view.cassino_player.db_player)
-        elif self.view.blackjack_dealer.hand_value > self.view.cassino_player.hand_value:
-            content += "\nThe dealer wins!"
-            content += f"\nYou lost ${self.view.bet}!"
-        elif self.view.blackjack_dealer.hand_value < self.view.cassino_player.hand_value:
-            content += "\nYou win!"
-            content += f"\nYou won ${self.view.bet}!"
-            self.view.cassino_player.db_player.balance += self.view.bet*2
-            self.view.cassino_player.db_player.money_won += self.view.bet*2
-            self.view.cassino_player.db_player.blackjack_wins += self.view.bet*2
-            await self.view.cassino_player.update(self.view.cassino_player.db_player)
-        else:
-            content += "\nIt's a tie!"
-            content += f"\nYou get your ${self.view.bet} back!"
-            self.view.cassino_player.db_player.balance += self.view.bet
-            self.view.cassino_player.db_player.money_won += self.view.bet
-            self.view.cassino_player.db_player.blackjack_wins += self.view.bet
-            await self.view.cassino_player.update(self.view.cassino_player.db_player)
+
+        # Append the result-related content
+        content += self.determine_winner()
+        
+        # Disable further actions since the round is over
         self.enable_bet_buttons()
         self.enable_start_button()
         self.disable_play_buttons()
+        
+        # Update the player's balance and statistics
+        await self.view.cassino_player.update(self.view.cassino_player.db_player)
+        await interaction.response.edit_message(content=content, view=self.view)
+
+
+    async def double(self, interaction: discord.Interaction):
+        if self.view.cassino_player.db_player.balance < self.view.bet:
+            await interaction.response.send_message("You don't have enough balance to double your bet!", ephemeral=True)
+            return
+        
+        self.view.bet *= 2
+        self.view.cassino_player.db_player.balance -= self.view.bet
+        self.view.cassino_player.db_player.money_lost += self.view.bet
+
+        self.view.blackjack_dealer.hit(self.view.cassino_player)
+        plays = self.view.blackjack_dealer.play()
+
+        content = self.display()
+        content += f"\n{plays}"
+        content += self.determine_winner()
+
+        self.disable_play_buttons()
+        self.enable_bet_buttons()
+        self.enable_start_button()
+
+        await self.view.cassino_player.update(self.view.cassino_player.db_player)
         await interaction.response.edit_message(content=content, view=self.view)
 
     async def back(self, interaction: discord.Interaction):
@@ -337,14 +348,22 @@ class BlackjackButton(discord.ui.Button):
             return True
         return False
 
+    def update_player_stats(self, win=False, tie=False):
+        if win:
+            self.view.cassino_player.db_player.balance += self.view.bet*2
+            self.view.cassino_player.db_player.money_won += self.view.bet*2
+            self.view.cassino_player.db_player.blackjack_wins += self.view.bet*2
+        elif tie:
+            self.view.cassino_player.db_player.balance += self.view.bet
+
     def disable_play_buttons(self):
         for item in self.view.children:
-            if isinstance(item, BlackjackButton) and item.action in ["hit", "stand"]:
+            if isinstance(item, BlackjackButton) and item.action in ["hit", "stand", "double"]:
                 item.disabled = True
     
     def enable_play_buttons(self):
         for item in self.view.children:
-            if isinstance(item, BlackjackButton) and item.action in ["hit", "stand"]:
+            if isinstance(item, BlackjackButton) and item.action in ["hit", "stand", "double"]:
                 item.disabled = False
 
     def disable_bet_buttons(self):
@@ -368,6 +387,27 @@ class BlackjackButton(discord.ui.Button):
                 item.disabled = False
 
     def display(self, force_display=False):
+        # Display only the current state of hands
         content = f"Your hand: {self.view.blackjack_dealer.display(self.view.cassino_player.hand, dealer=False, force_display=force_display)} => {self.view.cassino_player.hand_value}\n"
-        content += f"Dealers Hand: {self.view.blackjack_dealer.display(self.view.blackjack_dealer.hand, dealer=True, force_display=force_display)}"
+        content += f"Dealer's Hand: {self.view.blackjack_dealer.display(self.view.blackjack_dealer.hand, dealer=True, force_display=force_display)}"
         return content
+
+    def determine_winner(self):
+        # Generate only the result-related content
+        result_content = ""
+        if self.view.blackjack_dealer.bust:
+            result_content += "\nThe dealer busts!"
+            result_content += f"\nYou won ${self.view.bet}!"
+            self.update_player_stats(win=True)
+        elif self.view.blackjack_dealer.hand_value > self.view.cassino_player.hand_value:
+            result_content += "\nThe dealer wins!"
+            result_content += f"\nYou lost ${self.view.bet}!"
+        elif self.view.blackjack_dealer.hand_value < self.view.cassino_player.hand_value:
+            result_content += "\nYou win!"
+            result_content += f"\nYou won ${self.view.bet}!"
+            self.update_player_stats(win=True)
+        else:
+            result_content += "\nIt's a tie!"
+            result_content += f"\nYou get your ${self.view.bet} back!"
+            self.update_player_stats(tie=True)
+        return result_content

@@ -105,6 +105,15 @@ class CassinoView(discord.ui.View):
         self.add_item(
             BlackjackButton(
                 style=discord.ButtonStyle.blurple,
+                disabled=True,
+                label="Double",
+                action="double",
+                row=1,
+            )
+        )
+        self.add_item(
+            BlackjackButton(
+                style=discord.ButtonStyle.blurple,
                 label="<<",
                 action="back",
                 row=2,

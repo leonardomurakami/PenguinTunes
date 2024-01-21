@@ -18,6 +18,7 @@ from modules.cogs.fun import Fun
 from modules.cogs.config import Config
 from modules.views.music import PlayerView
 from modules.orm.database import Guild
+from modules.utils._database_utils import get_session
 
 # TODO: Implement commands outside of Music cog. Fun cog, Modding cog.
 # TODO: Implement simple dashboard to visualize, queue, control playstate of music from web.
@@ -48,12 +49,6 @@ class Bot(commands.Bot):
         Initializes the Bot instance with a specific command prefix, intents, description, and a custom help command.
         Sets up logging and initializes the superclass.
         """
-        self.sessionmaker = sessionmaker(
-            create_async_engine(
-                f"{config.database.db_driver}://{config.database.connection_url}"
-            ),
-            class_=AsyncSession,
-        )
         self.guild_prefix_cache = {}
         self.restricted_commands_cache = {}
         
@@ -94,7 +89,7 @@ class Bot(commands.Bot):
         """
         Property that returns an AsyncSession object for database interactions.
         """
-        return self.sessionmaker()
+        return get_session()
 
     async def setup_hook(self) -> None:
         """
