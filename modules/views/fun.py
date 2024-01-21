@@ -78,23 +78,6 @@ class CassinoView(discord.ui.View):
         )
         self.add_item(
             BlackjackButton(
-                style=discord.ButtonStyle.blurple,
-                label="Start",
-                action="start",
-                row=1,
-            )
-        )
-        self.add_item(
-            BlackjackButton(
-                style=discord.ButtonStyle.green,
-                disabled=True,
-                label="Hit",
-                action="hit",
-                row=1,
-            )
-        )
-        self.add_item(
-            BlackjackButton(
                 style=discord.ButtonStyle.red,
                 disabled=True,
                 label="Stand",
@@ -113,9 +96,26 @@ class CassinoView(discord.ui.View):
         )
         self.add_item(
             BlackjackButton(
+                style=discord.ButtonStyle.green,
+                disabled=True,
+                label="Hit",
+                action="hit",
+                row=1,
+            )
+        )
+        self.add_item(
+            BlackjackButton(
                 style=discord.ButtonStyle.blurple,
                 label="<<",
                 action="back",
+                row=2,
+            )
+        )
+        self.add_item(
+            BlackjackButton(
+                style=discord.ButtonStyle.blurple,
+                label="Start",
+                action="start",
                 row=2,
             )
         )
@@ -191,17 +191,17 @@ class CassinoView(discord.ui.View):
         )
         self.add_item(
             SlotButton(
-                style=discord.ButtonStyle.red,
-                label=f"{config.emoji.cassino.slots} Spin",
-                action="spin",
+                style=discord.ButtonStyle.blurple,
+                label=f"Prizes",
+                action="prizes",
                 row=1,
             )
         )
         self.add_item(
             SlotButton(
-                style=discord.ButtonStyle.blurple,
-                label=f"Prizes",
-                action="prizes",
+                style=discord.ButtonStyle.red,
+                label=f"{config.emoji.cassino.slots} Spin",
+                action="spin",
                 row=1,
             )
         )

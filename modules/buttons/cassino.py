@@ -238,6 +238,10 @@ class BlackjackButton(discord.ui.Button):
         if bet_is_none:
             return
         
+        if self.view.cassino_player.db_player.balance < self.view.bet:
+            await interaction.response.send_message("You don't have enough money to bet that amount!", ephemeral=True)
+            return 
+        
         await self.view.prepare_blackjack()
 
         self.view.cassino_player.add_to_hand(self.view.blackjack_dealer.deal_card())
