@@ -311,6 +311,8 @@ class BlackjackButton(discord.ui.Button):
         self.enable_bet_buttons()
         self.enable_start_button()
 
+        self.view.bet //= 2 #return bet to before double
+
         await self.view.cassino_player.update(self.view.cassino_player.db_player)
         await interaction.response.edit_message(content=content, view=self.view)
 
