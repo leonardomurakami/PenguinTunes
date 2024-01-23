@@ -42,6 +42,12 @@ class BlackjackPlayer(CassinoPlayer):
     def add_to_hand(self, card):
         self.hand.append(card)
 
+    @classmethod
+    async def create(cls, member: discord.Member):
+        self = BlackjackPlayer(member)
+        await self.initialize()
+        return self
+
     @property
     def hand_value(self) -> int:
         value = 0

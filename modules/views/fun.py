@@ -22,7 +22,7 @@ class CassinoView(discord.ui.View):
     def __init__(self, *, member: discord.Member, timeout: float | None = 180):
         super().__init__(timeout=timeout)
         self.member = member
-        self.cassino_player: CassinoPlayer | None = None
+        self.cassino_player: CassinoPlayer | BlackjackDealer = None
         self.bet: int = None
         
         self.slot_machine: SlotMachine | None = None
