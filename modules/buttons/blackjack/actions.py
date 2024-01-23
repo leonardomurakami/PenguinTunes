@@ -178,7 +178,7 @@ class DoubleAction(ActionCommand):
         self.view.blackjack_dealer.hit(self.view.cassino_player)
         plays = self.view.blackjack_dealer.play()
 
-        content = self.display()
+        content = self.display(force_display=True)
         content += f"\n{plays}"
         content += self.determine_winner()
 
