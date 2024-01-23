@@ -121,12 +121,9 @@ class Config(commands.Cog):
         else:
             await ctx.send(f"{command} is not a valid command!", ephemeral=True, delete_after=10)
 
-    @commands.command(name="test-emote")
-    async def refresh(self, ctx: commands.Context):
+    @commands.command(name="source")
+    async def source(self, ctx: commands.Context):
         """
-        Owner only command, sync the command tree for all guilds.
+        Displays the source code for the bot.
         """
-        if int(ctx.author.id) == int(config.bot_owner_id):
-            await ctx.send(f"[debug] emoji code: {config.emoji.cassino.blackjack.ace}")
-        else:
-            await ctx.send("You must be the owner to use this command!")
+        await ctx.send("[Github] - https://github.com/leonardomurakami/PenguinTunes")

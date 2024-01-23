@@ -1,9 +1,15 @@
 import discord
 
-from modules.buttons.cassino import BlackjackButton, SlotButton, CassinoSelect
-from modules.buttons.music import MusicButton
 from modules.globals import config
+
+from modules.buttons.cassino import CassinoSelect
 from modules.player.cassino import BlackjackDealer, CassinoPlayer, SlotMachine
+
+from modules.buttons.slots.buttons import SlotButton
+from modules.buttons.slots.actions import *
+
+from modules.buttons.blackjack.buttons import BlackjackButton
+from modules.buttons.blackjack.actions import *
 
 
 class CassinoView(discord.ui.View):
@@ -40,7 +46,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.grey,
                 label="$1" + "0"*self.bet_multiplier,
-                action="bet_1" + "0"*self.bet_multiplier,
+                action=BlackjackBetAction(self, 1*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -48,7 +54,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.grey,
                 label="$2" + "0"*self.bet_multiplier,
-                action="bet_2" + "0"*self.bet_multiplier,
+                action=BlackjackBetAction(self, 2*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -56,7 +62,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.grey,
                 label="$3" + "0"*self.bet_multiplier,
-                action="bet_3" + "0"*self.bet_multiplier,
+                action=BlackjackBetAction(self, 3*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -64,7 +70,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.grey,
                 label="$4" + "0"*self.bet_multiplier,
-                action="bet_4" + "0"*self.bet_multiplier,
+                action=BlackjackBetAction(self, 4*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -72,7 +78,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.grey,
                 label="$5" + "0"*self.bet_multiplier,
-                action="bet_5" + "0"*self.bet_multiplier,
+                action=BlackjackBetAction(self, 5*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -81,7 +87,7 @@ class CassinoView(discord.ui.View):
                 style=discord.ButtonStyle.red,
                 disabled=True,
                 label="Stand",
-                action="stand",
+                action=StandAction(self),
                 row=1,
             )
         )
@@ -90,7 +96,7 @@ class CassinoView(discord.ui.View):
                 style=discord.ButtonStyle.blurple,
                 disabled=True,
                 label="Double",
-                action="double",
+                action=DoubleAction(self),
                 row=1,
             )
         )
@@ -99,7 +105,7 @@ class CassinoView(discord.ui.View):
                 style=discord.ButtonStyle.green,
                 disabled=True,
                 label="Hit",
-                action="hit",
+                action=HitAction(self),
                 row=1,
             )
         )
@@ -107,7 +113,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.blurple,
                 label="<<",
-                action="back",
+                action=BlackjackReturnAction(self),
                 row=2,
             )
         )
@@ -115,7 +121,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.blurple,
                 label="Start",
-                action="start",
+                action=StartAction(self),
                 row=2,
             )
         )
@@ -123,7 +129,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.blurple,
                 label=f"/10",
-                action="decrease_bet",
+                action=BlackjackModifyBetAction(self, -1),
                 row=2,
             )
         )
@@ -131,7 +137,7 @@ class CassinoView(discord.ui.View):
             BlackjackButton(
                 style=discord.ButtonStyle.blurple,
                 label=f"x10",
-                action="increase_bet",
+                action=BlackjackModifyBetAction(self, 1),
                 row=2,
             )
         )
@@ -145,7 +151,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.grey,
                 label="$1" + "0"*self.bet_multiplier,
-                action="bet_1" + "0"*self.bet_multiplier,
+                action=SlotsBetAction(self, 1*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -153,7 +159,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.grey,
                 label="$2" + "0"*self.bet_multiplier,
-                action="bet_2" + "0"*self.bet_multiplier,
+                action=SlotsBetAction(self, 2*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -161,7 +167,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.grey,
                 label="$3" + "0"*self.bet_multiplier,
-                action="bet_3" + "0"*self.bet_multiplier,
+                action=SlotsBetAction(self, 3*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -169,7 +175,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.grey,
                 label="$4" + "0"*self.bet_multiplier,
-                action="bet_4" + "0"*self.bet_multiplier,
+                action=SlotsBetAction(self, 4*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -177,7 +183,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.grey,
                 label="$5" + "0"*self.bet_multiplier,
-                action="bet_5" + "0"*self.bet_multiplier,
+                action=SlotsBetAction(self, 5*(10**self.bet_multiplier)),
                 row=0,
             )
         )
@@ -185,7 +191,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.blurple,
                 label="<<",
-                action="back",
+                action=SlotsReturnAction(self),
                 row=1,
             )
         )
@@ -193,7 +199,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.blurple,
                 label=f"Prizes",
-                action="prizes",
+                action=DisplayPrizesAction(self),
                 row=1,
             )
         )
@@ -201,7 +207,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.red,
                 label=f"{config.emoji.cassino.slots} Spin",
-                action="spin",
+                action=SpinAction(self),
                 row=1,
             )
         )
@@ -209,7 +215,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.blurple,
                 label=f"/10",
-                action="decrease_bet",
+                action=SlotsModifyBetAction(self, -1),
                 row=1,
             )
         )
@@ -217,7 +223,7 @@ class CassinoView(discord.ui.View):
             SlotButton(
                 style=discord.ButtonStyle.blurple,
                 label=f"x10",
-                action="increase_bet",
+                action=SlotsModifyBetAction(self, 1),
                 row=1,
             )
         )
