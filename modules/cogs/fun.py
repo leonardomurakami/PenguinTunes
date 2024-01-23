@@ -32,9 +32,9 @@ from sqlalchemy import select
 
 from modules.globals import config
 from modules.orm.database import Cassino
-from modules.player.cassino import SlotMachine
 from modules.views.fun import CassinoView
 from modules.utils._config_utils import allowed_on_channel
+from modules.player.slots import SlotMachine
 
 
 class Fun(commands.Cog):

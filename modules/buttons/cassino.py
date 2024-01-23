@@ -2,7 +2,7 @@ import discord
 import wavelink
 
 from modules.globals import config
-from modules.player.cassino import CassinoPlayer
+from modules.player.player import CassinoPlayer
 
 
 class CassinoSelect(discord.ui.Select):
@@ -12,7 +12,7 @@ class CassinoSelect(discord.ui.Select):
         options = [
             discord.SelectOption(label="Slots", value="slots", description="Play Slots"),
             discord.SelectOption(label="Blackjack", value="blackjack", description="Play Blackjack"),
-            #discord.SelectOption(label="Roulette", value="roulette", description="Play Roulette"),
+            discord.SelectOption(label="Roulette", value="roulette", description="Play Roulette"),
         ]
         super().__init__(
             placeholder="Choose your game...",

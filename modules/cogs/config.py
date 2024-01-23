@@ -79,8 +79,7 @@ class Config(commands.Cog):
                     prefix = result.scalars().first().prefix
                 await ctx.send(f"Your current guild prefix is {prefix}")
 
-        else:  # else, set new prefix
-            # TODO: Abstract database logic to a Repository pattern.
+        else:
             async with self.bot.session as session:
                 result = await session.execute(
                     update(Guild)

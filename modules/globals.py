@@ -48,6 +48,7 @@ config.fun = Section("Fun section configuration and assets")
 config.fun.font_size = 14
 config.fun.font_path = "assets/fonts/Roboto-Light.ttf"
 config.fun.sisyphus_image_path = "assets/pictures/sisyphus.jpg"
+config.fun.roulette_table = "assets/pictures/roulette_table.png"
 config.fun.cassino_adjustment_factor = 1.2
 config.fun.house_retain = 0.1
 
