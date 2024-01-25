@@ -284,7 +284,7 @@ class Music(commands.Cog):
             else:
                 time_to_music = 0
             for track in player.queue[:10]:
-                queue_description += f"{random.choice(config.emoji.QUEUE_DECORATORS)} {track.title[:20]} by {track.author} | in {milliseconds_to_mm_ss(time_to_music)}\n"
+                queue_description += f"{random.choice(config.emoji.queue_decorators)} {track.title[:20]} by {track.author} | in {milliseconds_to_mm_ss(time_to_music)}\n"
                 time_to_music += track.length
 
             embed: discord.Embed = discord.Embed(title="Next up!")
