@@ -12,8 +12,7 @@ class VideoPokerButton(discord.ui.Button):
         style: discord.ButtonStyle | None = discord.ButtonStyle.secondary,
     ):
         """
-        Initializes the BlackJackButton with specific properties.
-        - player: The `wavelink.Player` instance associated with the button.
+        Initializes the VideoPokerButton with specific properties.
         - label: The text label displayed on the button.
         - action: The action to be performed when the button is clicked.
         - row: The row where the button should be placed in the Discord UI.

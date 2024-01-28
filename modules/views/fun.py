@@ -552,3 +552,11 @@ class CassinoView(discord.ui.View):
                 row=2,
             )
         )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.blurple,
+                label=f"Help",
+                action=DisplayHandsAction(self),
+                row=3,
+            )
+        )
