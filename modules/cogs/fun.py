@@ -204,3 +204,12 @@ class Fun(commands.Cog):
         embed.add_field(name="Slot wins", value=f"${player.slot_wins}")
         embed.add_field(name="Blackjack wins", value=f"${player.blackjack_wins}")
         await ctx.send(embed=embed)
+
+    @commands.command(name="global-stats", aliases=["globalstats", "gs"])
+    async def global_stats(self, ctx: commands.Context):
+        """
+        Sends the global stats.
+        - ctx: The context of the command.
+        """
+        
+        await ctx.send("[Dashboard]: " + config.fun.grafana_base_url + config.fun.cassino_dashboard)
