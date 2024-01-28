@@ -130,7 +130,7 @@ class VideoPokerModifyBetAction(ActionCommand):
             return
         self.view.bet_multiplier += self.amount
         self.view.bet = None
-        await self.view.prepare_slots()
+        await self.view.prepare_video_poker()
         await interaction.response.edit_message(view=self.view)
 
 class DisplayHandsAction(ActionCommand):
