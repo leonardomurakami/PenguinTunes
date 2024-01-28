@@ -22,6 +22,7 @@ services:
     networks:
       - lavalink
       - mysql
+
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4
     container_name: lavalink
@@ -39,6 +40,9 @@ services:
       - lavalink
     expose:
       - 2333
+    ports:
+      - "2333:2333"
+
   mysql:
     image: mysql
     volumes:
