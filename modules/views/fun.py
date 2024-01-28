@@ -3,8 +3,9 @@ import discord
 from modules.globals import config
 
 from modules.buttons.cassino import CassinoSelect
-from modules.player.player import BlackjackPlayer, CassinoPlayer
+from modules.player.player import BlackjackPlayer, CassinoPlayer, VideoPokerPlayer
 from modules.player.blackjack import BlackjackDealer
+from modules.player.video_poker import VideoPokerDealer
 from modules.player.roulette import Roulette
 from modules.player.slots import SlotMachine
 
@@ -16,6 +17,9 @@ from modules.buttons.blackjack.actions import *
 
 from modules.buttons.roulette.buttons import RouletteButton
 from modules.buttons.roulette.actions import *
+
+from modules.buttons.video_poker.buttons import VideoPokerButton
+from modules.buttons.video_poker.actions import *
 
 
 class CassinoView(discord.ui.View):
@@ -413,5 +417,138 @@ class CassinoView(discord.ui.View):
                 label=f"Help",
                 action=GetRouletteTable(self),
                 row=4,
+            )
+        )
+
+    async def prepare_video_poker(self):
+        self.dealer = VideoPokerDealer()
+        self.cassino_player = await VideoPokerPlayer.create(self.member, self.dealer)
+        self.clear_items()
+
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.grey,
+                label="$1" + "0"*self.bet_multiplier,
+                action=VideoPokerBetAction(self, 1*(10**self.bet_multiplier)),
+                row=0,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.grey,
+                label="$2" + "0"*self.bet_multiplier,
+                action=VideoPokerBetAction(self, 2*(10**self.bet_multiplier)),
+                row=0,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.grey,
+                label="$3" + "0"*self.bet_multiplier,
+                action=VideoPokerBetAction(self, 3*(10**self.bet_multiplier)),
+                row=0,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.grey,
+                label="$4" + "0"*self.bet_multiplier,
+                action=VideoPokerBetAction(self, 4*(10**self.bet_multiplier)),
+                row=0,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.grey,
+                label="$5" + "0"*self.bet_multiplier,
+                action=VideoPokerBetAction(self, 5*(10**self.bet_multiplier)),
+                row=0,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.green,
+                label=config.emoji.cassino.video_poker.unlock,
+                action=LockCardAction(self, 0),
+                disabled=True,
+                row=1,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.green,
+                label=config.emoji.cassino.video_poker.unlock,
+                action=LockCardAction(self, 1),
+                disabled=True,
+                row=1,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.green,
+                label=config.emoji.cassino.video_poker.unlock,
+                action=LockCardAction(self, 2),
+                disabled=True,
+                row=1,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.green,
+                label=config.emoji.cassino.video_poker.unlock,
+                action=LockCardAction(self, 3),
+                disabled=True,
+                row=1,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.green,
+                label=config.emoji.cassino.video_poker.unlock,
+                action=LockCardAction(self, 4),
+                disabled=True,
+                row=1,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.blurple,
+                label="<<",
+                action=VideoPokerReturnAction(self),
+                row=2,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.blurple,
+                label="Start",
+                action=VideoPokerStartAction(self),
+                row=2,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.blurple,
+                label="Draw",
+                action=RedrawAction(self),
+                disabled=True,
+                row=2,
+            
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.blurple,
+                label=f"/10",
+                action=VideoPokerModifyBetAction(self, -1),
+                row=2,
+            )
+        )
+        self.add_item(
+            VideoPokerButton(
+                style=discord.ButtonStyle.blurple,
+                label=f"x10",
+                action=VideoPokerModifyBetAction(self, 1),
+                row=2,
             )
         )

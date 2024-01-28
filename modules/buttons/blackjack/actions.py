@@ -90,6 +90,7 @@ class ActionCommand(ABC):
             result_content += "\nIt's a tie!"
             result_content += f"\nYou get your ${self.view.bet} back!"
             self.update_player_stats(tie=True)
+        result_content += f"\n Your new balance is ${self.view.cassino_player.db_player.balance}"
         return result_content
     
 
@@ -207,7 +208,7 @@ class BlackjackBetAction(ActionCommand):
         
     def bet_change_style(self, button: discord.ui.Button, style):
         for item in self.view.children:
-            if isinstance(item, discord.ui.Button) and item.style == discord.ButtonStyle.green:
+            if isinstance(item, discord.ui.Button) and item.style == discord.ButtonStyle.green and isinstance(item.action, BlackjackBetAction):
                 item.style = discord.ButtonStyle.grey
         button.style = style
 

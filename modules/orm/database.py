@@ -69,6 +69,7 @@ class Cassino(Base):
     slot_wins: Mapped[int] = mapped_column(Integer, default=0)
     blackjack_wins: Mapped[int] = mapped_column(Integer, default=0)
     roulette_wins: Mapped[int] = mapped_column(Integer, default=0)
+    video_poker_wins: Mapped[int] = mapped_column(Integer, default=0)
     money_won: Mapped[int] = mapped_column(Integer, default=0)
     money_lost: Mapped[int] = mapped_column(Integer, default=0)
     last_daily: Mapped[datetime.datetime] = mapped_column(DateTime, default=None)

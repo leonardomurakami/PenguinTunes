@@ -13,6 +13,7 @@ class CassinoSelect(discord.ui.Select):
             discord.SelectOption(label="Slots", value="slots", description="Play Slots"),
             discord.SelectOption(label="Blackjack", value="blackjack", description="Play Blackjack"),
             discord.SelectOption(label="Roulette", value="roulette", description="Play Roulette"),
+            discord.SelectOption(label="Video Poker", value="video_poker", description="Play Video Poker"),
         ]
         super().__init__(
             placeholder="Choose your game...",
@@ -36,6 +37,8 @@ class CassinoSelect(discord.ui.Select):
             await self.blackjack(interaction)
         elif self.values[0] == "roulette":
             await self.roulette(interaction)
+        elif self.values[0] == "video_poker":
+            await self.video_poker(interaction)
 
     async def slots(self, interaction: discord.Interaction):
         """
@@ -60,4 +63,10 @@ class CassinoSelect(discord.ui.Select):
         """
         await self.view.prepare_roulette()
         await interaction.response.edit_message(view=self.view)
-
+    async def video_poker(self, interaction: discord.Interaction):
+        """
+        The asynchronous callback executed when the button is clicked.
+        - interaction: The interaction instance associated with the button click.
+        """
+        await self.view.prepare_video_poker()
+        await interaction.response.edit_message(view=self.view)

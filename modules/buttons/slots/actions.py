@@ -65,7 +65,7 @@ class SlotsBetAction(ActionCommand):
         
     def bet_change_style(self, button: discord.ui.Button, style):
         for item in self.view.children:
-            if isinstance(item, discord.ui.Button) and item.style == discord.ButtonStyle.green:
+            if isinstance(item, discord.ui.Button) and item.style == discord.ButtonStyle.green and isinstance(item.action, SlotsBetAction):
                 item.style = discord.ButtonStyle.grey
         button.style = style
 

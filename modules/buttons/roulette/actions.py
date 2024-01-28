@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from io import BytesIO
-import logging
 from PIL import Image, ImageDraw, ImageFont
 from modules.globals import config
 
@@ -72,7 +71,7 @@ class RouletteBetAction(ActionCommand):
         
     def bet_change_style(self, button: discord.ui.Button, style):
         for item in self.view.children:
-            if isinstance(item, discord.ui.Button) and item.style == discord.ButtonStyle.green:
+            if isinstance(item, discord.ui.Button) and item.style == discord.ButtonStyle.green and isinstance(item.action, RouletteBetAction):
                 item.style = discord.ButtonStyle.grey
         button.style = style
 

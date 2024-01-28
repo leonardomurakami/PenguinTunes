@@ -53,6 +53,7 @@ config.fun.cassino_adjustment_factor = 1.2
 config.fun.house_retain = 0.1
 config.fun.cassino_dashboard = "/fc8f40eaa7e24eecbb57e4efd7175e33?orgId=1"
 config.fun.grafana_base_url = "https://grafana.murakams.com/public-dashboards"
+config.fun.poker_table = "assets/pictures/poker_table.png"
 
 config.database = Section("Database config section")
 config.database.db_username = os.getenv("DB_USERNAME")
@@ -138,3 +139,7 @@ config.emoji.cassino.blackjack.spades = "\U00002660\ufe0f"
 config.emoji.cassino.blackjack.hearts = "\U00002665\ufe0f"
 config.emoji.cassino.blackjack.clubs = "\U00002663\ufe0f"
 config.emoji.cassino.blackjack.diamonds = "\U00002666\ufe0f"
+
+config.emoji.cassino.video_poker = Section("Emojis for Video Poker")
+config.emoji.cassino.video_poker.lock = "\U0001F512"
+config.emoji.cassino.video_poker.unlock = "\U0001F513"
