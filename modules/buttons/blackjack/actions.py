@@ -27,6 +27,9 @@ class ActionCommand(ABC):
             self.view.cassino_player.db_player.blackjack_wins += self.view.bet*2
         elif tie:
             self.view.cassino_player.db_player.balance += self.view.bet
+        else:
+            self.view.cassino_player.db_player.balance -= self.view.bet
+            self.view.cassino_player.db_player.money_lost += self.view.bet
 
     def disable_play_buttons(self):
         for item in self.view.children:
@@ -75,21 +78,25 @@ class ActionCommand(ABC):
     def determine_winner(self):
         # Generate only the result-related content
         result_content = ""
-        if self.view.blackjack_dealer.bust:
+        if self.view.cassino_player.bust:
+            result_content += "\nYou bust!"
+            result_content += f"\nYou lost ${self.view.bet}!"
+            self.update_player_stats(win=False, tie=False)
+        elif self.view.blackjack_dealer.bust:
             result_content += "\nThe dealer busts!"
             result_content += f"\nYou won ${self.view.bet}!"
-            self.update_player_stats(win=True)
+            self.update_player_stats(win=True, tie=False)
         elif self.view.blackjack_dealer.hand_value > self.view.cassino_player.hand_value:
             result_content += "\nThe dealer wins!"
             result_content += f"\nYou lost ${self.view.bet}!"
         elif self.view.blackjack_dealer.hand_value < self.view.cassino_player.hand_value:
             result_content += "\nYou win!"
             result_content += f"\nYou won ${self.view.bet}!"
-            self.update_player_stats(win=True)
+            self.update_player_stats(win=True, tie=False)
         else:
             result_content += "\nIt's a tie!"
             result_content += f"\nYou get your ${self.view.bet} back!"
-            self.update_player_stats(tie=True)
+            self.update_player_stats(win=False, tie=True)
         result_content += f"\n Your new balance is ${self.view.cassino_player.db_player.balance}"
         return result_content
     
