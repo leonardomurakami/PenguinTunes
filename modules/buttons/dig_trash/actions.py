@@ -33,7 +33,7 @@ class DigTrashAction(ActionCommand):
         self.view = view
 
     async def execute(self, button: discord.ui.Button, interaction: discord.Interaction): 
-        if (roll := random.random()) > 0.80:
+        if (roll := random.random()) > 0.90:
             prize = int(1000*random.random())
             await self.update_balance(prize)
             content=f"You found ${prize} in the trash!"
