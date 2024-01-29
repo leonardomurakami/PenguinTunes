@@ -14,6 +14,7 @@ class CassinoSelect(discord.ui.Select):
             discord.SelectOption(label="Blackjack", value="blackjack", description="Play Blackjack"),
             discord.SelectOption(label="Roulette", value="roulette", description="Play Roulette"),
             discord.SelectOption(label="Video Poker", value="video_poker", description="Play Video Poker"),
+            discord.SelectOption(label="Dig Trash", value="dig", description="Dig trash for money"),
         ]
         super().__init__(
             placeholder="Choose your game...",
@@ -31,7 +32,9 @@ class CassinoSelect(discord.ui.Select):
             await interaction.response.send_message("This is not your cassino!", ephemeral=True)
             return
         
-        if self.values[0] == "slots":
+        if self.values[0] == "dig":
+            await self.dig_trash(interaction)
+        elif self.values[0] == "slots":
             await self.slots(interaction)
         elif self.values[0] == "blackjack":
             await self.blackjack(interaction)
@@ -69,4 +72,11 @@ class CassinoSelect(discord.ui.Select):
         - interaction: The interaction instance associated with the button click.
         """
         await self.view.prepare_video_poker()
+        await interaction.response.edit_message(view=self.view)
+    async def dig_trash(self, interaction: discord.Interaction):
+        """
+        The asynchronous callback executed when the button is clicked.
+        - interaction: The interaction instance associated with the button click.
+        """
+        await self.view.prepare_dig_trash()
         await interaction.response.edit_message(view=self.view)

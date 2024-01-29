@@ -21,6 +21,9 @@ from modules.buttons.roulette.actions import *
 from modules.buttons.video_poker.buttons import VideoPokerButton
 from modules.buttons.video_poker.actions import *
 
+from modules.buttons.dig_trash.buttons import DigTrashButton
+from modules.buttons.dig_trash.actions import *
+
 
 class CassinoView(discord.ui.View):
     def __init__(self, *, member: discord.Member, timeout: float | None = 180):
@@ -46,6 +49,26 @@ class CassinoView(discord.ui.View):
     
     def get_bet(self):
         return self.cassino_player.bet
+
+    async def prepare_dig_trash(self):
+        self.cassino_player = await CassinoPlayer.create(self.member)
+        self.clear_items()
+        self.add_item(
+            DigTrashButton(
+                style=discord.ButtonStyle.blurple,
+                label="<<",
+                action=DigTrashReturnAction(self),
+                row=0,
+            )
+        )
+        self.add_item(
+            DigTrashButton(
+                style=discord.ButtonStyle.grey,
+                label="Search Trash",
+                action=DigTrashAction(self),
+                row=0,
+            )
+        )
 
     async def prepare_blackjack(self):
         self.blackjack_dealer = BlackjackDealer()

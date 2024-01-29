@@ -155,7 +155,7 @@ class Fun(commands.Cog):
                 
                 await ctx.send(f"You already claimed your daily for today! Come back in {time_message}.")
                 return
-            player.balance += 1000
+            player.balance += config.fun.daily_amount
             player.last_daily = datetime.datetime.now(datetime.timezone.utc)
             await session.commit()
             await session.refresh(player)

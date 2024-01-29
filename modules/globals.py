@@ -54,6 +54,7 @@ config.fun.house_retain = 0.1
 config.fun.cassino_dashboard = "/fc8f40eaa7e24eecbb57e4efd7175e33?orgId=1"
 config.fun.grafana_base_url = "https://grafana.murakams.com/public-dashboards"
 config.fun.poker_table = "assets/pictures/poker_table.png"
+config.fun.daily_amount = 5000
 
 config.database = Section("Database config section")
 config.database.db_username = os.getenv("DB_USERNAME")
