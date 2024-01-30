@@ -16,12 +16,14 @@ class ActionCommand(ABC):
         return True
 
     async def ensure_minimum_balance(self, interaction: discord.Interaction, required_balance):
+        await self.view.cassino_player.refresh()
         if self.view.cassino_player.db_player.balance < required_balance:
             await interaction.response.send_message("You don't have enough money for this action!", ephemeral=True)
             return False
         return True
 
     async def update_balance(self, prize):
+        await self.view.cassino_player.refresh()
         self.view.cassino_player.db_player.balance += prize
         self.view.cassino_player.db_player.money_won += max(prize, 0)
         self.view.cassino_player.db_player.dig_trash_wins += max(prize, 0)

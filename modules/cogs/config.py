@@ -31,11 +31,12 @@ Additional Notes:
 - This cog plays a crucial role in maintaining the bot's operability and customizability across multiple Discord servers.
 """
 from discord import Object
+import discord
 from discord.ext import commands
 from sqlalchemy import select, update
 
 from modules.globals import config
-from modules.orm.database import Guild, RestrictedCommands
+from modules.orm.database import Cassino, Guild, RestrictedCommands
 
 
 class Config(commands.Cog):
@@ -126,3 +127,24 @@ class Config(commands.Cog):
         Displays the source code for the bot.
         """
         await ctx.send("[Github] - https://github.com/leonardomurakami/PenguinTunes")
+
+    @commands.command(name="award")
+    async def award(self, ctx: commands.Context, member: discord.Member, amount: int):
+        """
+        Bot owner command to award a user with a specified amount of money.
+        """
+        if int(ctx.author.id) == int(config.bot_owner_id):
+            async with self.bot.session as session:
+                player = await session.get(Cassino, int(member.id))
+                if not player:
+                    player = Cassino(id=ctx.author.id, balance=1000)
+                    session.add(player)
+                    await session.commit()
+                    await session.refresh(player)
+                player.balance += amount
+                await session.commit()
+                await session.refresh(player)
+            await ctx.send(f"🏆 {member.mention} has been awarded ${amount} for finding a bug! New balance: ${player.balance}")
+        else:
+            await ctx.send("You must be the owner to use this command!")
+        

@@ -15,18 +15,21 @@ class ActionCommand(ABC):
         return True
 
     async def ensure_minimum_balance(self, interaction: discord.Interaction, required_balance):
+        await self.view.cassino_player.refresh()
         if self.view.cassino_player.db_player.balance < required_balance:
             await interaction.response.send_message("You don't have enough money for this action!", ephemeral=True)
             return False
         return True
 
-    def update_balance(self, prize, bet):
-        player = self.view.cassino_player.db_player
-        player.balance += prize - bet
-        player.money_won += max(prize, 0)
-        player.money_lost += bet
+    async def update_balance(self, prize, bet):
+        await self.view.cassino_player.refresh()
+        self.view.cassino_player.db_player.balance -= bet
+        self.view.cassino_player.db_player.money_lost += bet
         if prize > 0:
-            player.slot_wins += prize
+            self.view.cassino_player.db_player.money_won += prize
+            self.view.cassino_player.db_player.balance += prize
+            self.view.cassino_player.db_player.slot_wins += prize
+        await self.view.cassino_player.update(self.view.cassino_player.db_player)
 
 
 class SpinAction(ActionCommand):
@@ -41,13 +44,12 @@ class SpinAction(ActionCommand):
         
         machine_result = self.view.slot_machine.spin()
         prize = await self.view.slot_machine.calculate_prize(machine_result, self.view.bet)
-        self.update_balance(prize, self.view.bet)
+        await self.update_balance(prize, self.view.bet)
         
         content = " ".join(machine_result)
         content += f"\nYou {'won' if prize > 0 else 'lost'} ${prize if prize > 0 else self.view.bet}!"
         content += f"\nYour balance is now ${self.view.cassino_player.db_player.balance}"
         
-        await self.view.cassino_player.update(self.view.cassino_player.db_player)
         await interaction.response.edit_message(content=content, view=self.view)
 
 

@@ -18,17 +18,19 @@ class ActionCommand(ABC):
         return True 
 
     async def ensure_minimum_balance(self, interaction: discord.Interaction, required_balance):
+        await self.view.cassino_player.refresh()
         if self.view.cassino_player.db_player.balance < required_balance:
             await interaction.response.send_message("You don't have enough money for this action!", ephemeral=True)
             return False
         return True
     
-    def update_balance(self, prize, bet):
-        player = self.view.cassino_player.db_player
-        player.balance += prize
-        player.money_won += max(prize, 0)
-        player.money_lost += bet if prize > 0 else 0
-        player.roulette_wins += prize if prize > 0 else 0
+    async def update_balance(self, prize, bet):
+        await self.view.cassino_player.refresh()
+        self.view.cassino_player.db_player.balance += prize
+        self.view.cassino_player.db_player.money_won += max(prize, 0)
+        self.view.cassino_player.db_player.money_lost += bet if prize > 0 else 0
+        self.view.cassino_player.db_player.roulette_wins += prize if prize > 0 else 0
+        await self.view.cassino_player.update(self.view.cassino_player.db_player)
 
     async def spin(self, interaction: discord.Interaction, condition: bool, prize_modifier: int):
         if not await self.ensure_bet(interaction):
@@ -41,11 +43,11 @@ class ActionCommand(ABC):
         else:
             prize = -self.view.bet
 
-        self.update_balance(prize, self.view.bet)
-        self.view.bet = None
+        await self.update_balance(prize, self.view.bet)
 
+        self.view.bet = None
         content = self.display(prize, self.view.roulette.winning_number)
-        await self.view.cassino_player.update(self.view.cassino_player.db_player)
+        
         await self.view.prepare_roulette()
         await interaction.response.edit_message(content=content, view=self.view)
 

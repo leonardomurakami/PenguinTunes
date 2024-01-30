@@ -19,14 +19,16 @@ class ActionCommand(ABC):
         return True
 
     async def ensure_minimum_balance(self, interaction: discord.Interaction, required_balance):
+        await self.view.cassino_player.refresh()
         if self.view.cassino_player.db_player.balance < required_balance:
             await interaction.response.send_message("You don't have enough money for this action!", ephemeral=True)
             return False
         return True
 
     async def update_balance(self, prize, bet):
+        await self.view.cassino_player.refresh()
         player = self.view.cassino_player.db_player
-        player.balance += prize
+        player.balance += (prize - bet)
         player.money_won += max(prize, 0)
         player.money_lost += bet
         if prize > 0:
@@ -185,6 +187,8 @@ class RedrawAction(ActionCommand):
         self.view.cassino_player.redraw()
         prize = self.view.cassino_player.calculate_winnings(self.view.bet)
 
+        await self.update_balance(prize, 0)
+
         content = f"Your final hand is: {self.view.cassino_player.display_hand()}"
         content += f"\n You have a {self.view.cassino_player.hand_evaluation}!"
         if prize > 0:
@@ -194,6 +198,5 @@ class RedrawAction(ActionCommand):
         content += f"\n Your new balance is ${self.view.cassino_player.db_player.balance}"
 
         self.view.bet = None
-        await self.update_balance(prize, 0)
         await self.view.prepare_video_poker()
         await interaction.response.edit_message(content=content, view=self.view)

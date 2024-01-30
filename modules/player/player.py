@@ -36,6 +36,9 @@ class CassinoPlayer:
             await session.commit()
             await session.refresh(player)
 
+    async def refresh(self):
+        async with get_session() as session:
+            self.db_player = await session.get(Cassino, int(self.member.id))
 
 class BlackjackPlayer(CassinoPlayer):
     def __init__(self, member: discord.Member) -> None:
@@ -111,15 +114,15 @@ class VideoPokerPlayer(CassinoPlayer):
 
     def calculate_winnings(self, bet_amount):
         payouts = {
-            "Royal Flush": 800,
-            "Straight Flush": 50,
-            "Four of a Kind": 25,
-            "Full House": 9,
-            "Flush": 6,
-            "Straight": 4,
-            "Three of a Kind": 3,
-            "Two Pair": 2,
-            "Jacks or Better": 1,
+            "Royal Flush": 801,
+            "Straight Flush": 51,
+            "Four of a Kind": 26,
+            "Full House": 10,
+            "Flush": 7,
+            "Straight": 5,
+            "Three of a Kind": 4,
+            "Two Pair": 3,
+            "Jacks or Better": 2,
             "High Card": 0,
         }
         hand_rank = self.hand_evaluation
