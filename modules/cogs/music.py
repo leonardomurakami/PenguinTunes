@@ -173,11 +173,15 @@ class Music(commands.Cog):
             tracks: wavelink.Search = await wavelink.Playable.search(query)
         elif query.startswith("music:"):
             tracks: wavelink.Search = await wavelink.Playable.search(
-                query, source="ytmsearch:"
+                query.split(":", 1)[1], source="ytmsearch:"
             )
         elif query.startswith("spotify:"):
             tracks: wavelink.Search = await wavelink.Playable.search(
-                query, source="spsearch:"
+                query.split(":", 1)[1], source="spsearch:"
+            )
+        elif query.startswith("speak:") or query.startswith("tts:"):
+            tracks: wavelink.Search = await wavelink.Playable.search(
+                query.split(":", 1)[1], source="speak:"
             )
         else:
             tracks: wavelink.Search = await wavelink.Playable.search(
