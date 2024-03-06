@@ -26,15 +26,15 @@ from modules.buttons.dig_trash.actions import *
 
 
 class CassinoView(discord.ui.View):
-    def __init__(self, *, member: discord.Member, timeout: float | None = 180):
+    def __init__(self, *, member: discord.Member, timeout: float = 180):
         super().__init__(timeout=timeout)
         self.member = member
         self.cassino_player: CassinoPlayer | BlackjackDealer = None
         self.bet: int = None
         
-        self.slot_machine: SlotMachine | None = None
+        self.slot_machine: SlotMachine = None
         self.bet_multiplier: int = 1
-        self.blackjack_dealer: BlackjackDealer | None = None
+        self.blackjack_dealer: BlackjackDealer = None
         self.roulette = None
         self.prepare_menu()
 
@@ -48,7 +48,7 @@ class CassinoView(discord.ui.View):
         self.bet = bet
     
     def get_bet(self):
-        return self.cassino_player.bet
+        return self.bet
 
     async def prepare_dig_trash(self):
         self.cassino_player = await CassinoPlayer.create(self.member)

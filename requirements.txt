@@ -7,3 +7,5 @@ asyncmy
 pillow
 cryptography
 tabulate
+pytest
+pytest-asyncio

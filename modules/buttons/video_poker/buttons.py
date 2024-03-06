@@ -8,8 +8,8 @@ class VideoPokerButton(discord.ui.Button):
         label: str,
         action: str,
         disabled: bool = False,
-        row: int | None = None,
-        style: discord.ButtonStyle | None = discord.ButtonStyle.secondary,
+        row: int = None,
+        style: discord.ButtonStyle = discord.ButtonStyle.secondary,
     ):
         """
         Initializes the VideoPokerButton with specific properties.

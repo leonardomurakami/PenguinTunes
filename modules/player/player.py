@@ -7,12 +7,10 @@ from modules.orm.database import Cassino, PersistentValues
 from modules.player.video_poker import VideoPokerDealer
 from modules.utils._database_utils import get_session
 
-
-
 class CassinoPlayer:
     def __init__(self, member: discord.Member) -> None:
         self.member: discord.Member = member
-        self.db_player: Cassino | None = None
+        self.db_player: Cassino = None
 
     @classmethod
     async def create(cls, member: discord.Member):
