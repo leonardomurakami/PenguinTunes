@@ -30,8 +30,10 @@ Additional Notes:
 - The cog includes owner-only commands to ensure that critical bot settings are managed securely and responsibly.
 - This cog plays a crucial role in maintaining the bot's operability and customizability across multiple Discord servers.
 """
-from discord import Object
+import re
 import discord
+
+from discord import Object
 from discord.ext import commands
 from sqlalchemy import select, update
 
@@ -91,6 +93,23 @@ class Config(commands.Cog):
 
                 await session.commit()
                 await ctx.send(f"Changing prefix to {new_prefix}")
+    
+    @commands.hybrid_command(name="change-nickname", aliases=["change-nick", "cn", "nick", "nickname"])
+    async def change_nickname(self, ctx: commands.Context, *, new_nickname: str = ""):
+        """
+        Sets a custom nickname for someone else in the server
+        """
+        if mention_list := ctx.message.mentions:
+            member = mention_list[0]
+            new_nick = re.sub(r"<[^>]+>", "", new_nickname).strip()
+            if not new_nick:
+                new_nick = member.name
+            try:
+                await member.edit(nick=new_nick)
+                await ctx.send(f"Changed {member.mention}'s nickname to {new_nick}")
+            except discord.errors.Forbidden:
+                await ctx.send(f"Could not change {member.mention}'s nickname.\nI don't have the required permissions to change this user's name.")
+        
 
     @commands.hybrid_command(name="restrict", aliases=["restrict-command"])
     @commands.has_permissions(manage_messages=True)

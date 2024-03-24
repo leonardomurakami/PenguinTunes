@@ -38,7 +38,7 @@ Class Descriptions:
 """
 
 import datetime
-from sqlalchemy import DateTime, String, BigInteger, Integer
+from sqlalchemy import DateTime, String, BigInteger, Integer, BOOLEAN, JSON, BIGINT, TIMESTAMP, text
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -106,3 +106,19 @@ class RestrictedCommands(Base):
         - Returns a formatted string representation of the Guild instance, including its id and prefix.
         """
         return f"User(id={self.id!r}, name={self.name!r}, value={self.value!r})"
+    
+
+class Job(Base):
+    __tablename__ = 'jobs'
+
+    job_id = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    job_name = mapped_column(String(255), nullable=False)
+    interval_seconds = mapped_column(BIGINT, nullable=False)
+    last_run = mapped_column(TIMESTAMP, default=text("CURRENT_TIMESTAMP"))
+    config = mapped_column(JSON)
+    enabled = mapped_column(BOOLEAN, nullable=False, default=text("TRUE"))
+
+    def __repr__(self) -> str:
+        return (f"Job(job_id={self.job_id!r}, job_name={self.job_name!r}, "
+                f"interval_seconds={self.interval_seconds!r}, last_run={self.last_run!r}, "
+                f"config={self.config!r}, enabled={self.enabled!r})")

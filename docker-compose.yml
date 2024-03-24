@@ -24,7 +24,7 @@ services:
       - mysql
 
   lavalink:
-    image: ghcr.io/lavalink-devs/lavalink:fix-yt-400-v3
+    image: ghcr.io/lavalink-devs/lavalink:4.0.2
     container_name: lavalink
     restart: unless-stopped
     environment:
