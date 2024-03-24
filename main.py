@@ -183,6 +183,35 @@ class Bot(commands.Bot):
         if len(voice_state.channel.members) == 1:
             await voice_state.disconnect()
 
+    def __repr__(self) -> str:
+        """
+        Returns a detailed string representation of the Bot instance, useful for debugging and understanding the bot's current state.
+        """
+        bot_status = "uninitialized"
+        bot_name = "Unknown"
+        bot_id = "N/A"
+        guild_count = "N/A"
+        default_prefix = "Not set"
+        wavelink_connected = "No"
+        guild_prefix_cache = self.guild_prefix_cache
+        restricted_commands_cache = self.restricted_commands_cache
+        
+
+        if hasattr(self, "user"):  # Checks if the bot is logged in
+            bot_status = "logged in"
+            bot_name = self.user.name
+            bot_id = self.user.id
+            guild_count = len(self.guilds)
+
+        if hasattr(self, "guild_prefix_cache"):  # Checks if the default command prefix is set
+            default_prefix = config.default_prefix  # Assuming config.default_prefix is accessible
+
+        if hasattr(self, "wavelink"):  # Checks if Wavelink is connected/initialized
+            wavelink_connected = "Yes" if self.wavelink.nodes else "No"
+
+        return (f"<Bot {bot_status} | name='{bot_name}' | id={bot_id} | guilds={guild_count} "
+                f"| default_prefix='{default_prefix}' | Wavelink connected={wavelink_connected}>"
+                f"\n Guild Prefix Cache: {guild_prefix_cache} \n Restricted Commands Cache: {restricted_commands_cache}")
 
 bot: Bot = Bot()
 

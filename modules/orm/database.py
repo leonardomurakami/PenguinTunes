@@ -38,7 +38,7 @@ Class Descriptions:
 """
 
 import datetime
-from sqlalchemy import DateTime, String, BigInteger, Integer, BOOLEAN, JSON, BIGINT, TIMESTAMP, text
+from sqlalchemy import DateTime, ForeignKey, String, BigInteger, Integer, BOOLEAN, JSON, BIGINT, TIMESTAMP, UniqueConstraint, text
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -92,20 +92,7 @@ class PersistentValues(Base):
         - Overrides the default representation method.
         - Returns a formatted string representation of the Guild instance, including its id and prefix.
         """
-        return f"User(id={self.id!r}, name={self.name!r}, value={self.value!r})"
-    
-
-class RestrictedCommands(Base):
-    __tablename__ = "restricted_commands"
-    command_id: Mapped[str] = mapped_column(String(50), primary_key=True)
-    channel: Mapped[int] = mapped_column(BigInteger, nullable=True, default=None)
-
-    def __repr__(self) -> str:
-        """
-        - Overrides the default representation method.
-        - Returns a formatted string representation of the Guild instance, including its id and prefix.
-        """
-        return f"User(id={self.id!r}, name={self.name!r}, value={self.value!r})"
+        return f"User(name={self.name!r}, value={self.value!r})"
     
 
 class Job(Base):
@@ -122,3 +109,20 @@ class Job(Base):
         return (f"Job(job_id={self.job_id!r}, job_name={self.job_name!r}, "
                 f"interval_seconds={self.interval_seconds!r}, last_run={self.last_run!r}, "
                 f"config={self.config!r}, enabled={self.enabled!r})")
+    
+
+class Command(Base):
+    __tablename__ = 'commands'
+    command_id = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    guild_id = mapped_column(BIGINT, nullable=False)
+    command_name = mapped_column(String(255), nullable=False)
+    __table_args__ = (UniqueConstraint('guild_id', 'command_name'),)
+
+
+class CommandRestriction(Base):
+    __tablename__ = 'command_restrictions'
+    restriction_id = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    command_id = mapped_column(BIGINT, ForeignKey('commands.command_id'), nullable=False)
+    restriction_type = mapped_column(String(50), nullable=False)
+    restriction_target = mapped_column(BIGINT, nullable=False)
+    __table_args__ = (UniqueConstraint('command_id', 'restriction_type', 'restriction_target'),)

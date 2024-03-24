@@ -38,7 +38,9 @@ from discord.ext import commands
 from sqlalchemy import select, update
 
 from modules.globals import config
-from modules.orm.database import Cassino, Guild, RestrictedCommands
+from modules.orm.database import Cassino, Guild, Command, CommandRestriction
+from modules.utils._database_utils import get_session
+from modules.utils._config_utils import is_command_allowed
 
 
 class Config(commands.Cog):
@@ -113,32 +115,83 @@ class Config(commands.Cog):
 
     @commands.hybrid_command(name="restrict", aliases=["restrict-command"])
     @commands.has_permissions(manage_messages=True)
-    async def restrict(self, ctx: commands.Context, *, command: str):
+    async def restrict(self, ctx: commands.Context, *, params: str):
         """
-        Restricts a command to the channel the commands was used.
+        Restricts a command to the specified channel or role within the guild.
+        
+        Parameters:
+        - command_name: Name of the command to restrict.
+        - restriction_type: Type of restriction ('channel' or 'role').
+        - restriction_target: ID of the channel or role to restrict the command to.
         """
-        if (bot_command := self.bot.get_command(command)):
-            command = bot_command.name #ensure name is picked, not alias
-            async with self.bot.session as session:
-                command_db = await session.get(RestrictedCommands, f"{str(ctx.guild.id)}_{command}")
-                if not command_db:
-                    if not ctx.channel.guild.id in self.bot.restricted_commands_cache.keys():
-                        self.bot.restricted_commands_cache[ctx.channel.guild.id] = {}
-                    self.bot.restricted_commands_cache[ctx.channel.guild.id][command] = ctx.channel.id
-                    command_db = RestrictedCommands(command_id=f"{str(ctx.guild.id)}_{command}", channel=ctx.channel.id)
-                    session.add(command_db)
-                    await session.commit()
-                    await session.refresh(command_db)
-                else:
-                    if not ctx.channel.guild.id in self.bot.restricted_commands_cache.keys():
-                        self.bot.restricted_commands_cache[ctx.channel.guild.id] = {}
-                    self.bot.restricted_commands_cache[ctx.channel.guild.id][command] = ctx.channel.id
-                    command_db.channel = ctx.channel.id
-                    await session.commit()
-                    await session.refresh(command_db)
-                await ctx.send(f"Restricted {command} to channel {ctx.channel.mention}")
-        else:
-            await ctx.send(f"{command} is not a valid command!", ephemeral=True, delete_after=10)
+        parts = params.split(maxsplit=2)
+        if len(parts) < 2:
+            await ctx.send("Please specify both the command name and the restriction type ('channel' or 'role').")
+            return
+
+        command_name, restriction_type = parts[0], parts[1]
+        channel_mentions = ctx.message.channel_mentions
+        role_mentions = ctx.message.role_mentions
+
+        if restriction_type not in ["channel", "role"]:
+            await ctx.send("Invalid restriction type. Please use 'channel' or 'role'")
+            return
+        
+        if restriction_type == "channel":
+            if not channel_mentions:
+                await ctx.send("Please mention a channel to restrict the command to.")
+                return
+            restriction_target = channel_mentions[0].id
+        
+        if restriction_type == "role":
+            if not role_mentions:
+                await ctx.send("Please mention a role to restrict the command to.")
+                return
+            restriction_target = role_mentions[0].id
+
+        if self.bot.get_command(command_name) is None:
+            await ctx.send(f"Command {command_name} not found.")
+            return
+
+        async with get_session() as session:
+            # Find or create the command in the Commands table
+            stmt = select(Command).where(Command.guild_id == ctx.guild.id, Command.command_name == command_name)
+            result = await session.execute(stmt)
+            command_entry = result.scalars().first()
+            
+            if not command_entry:
+                command_entry = Command(guild_id=ctx.guild.id, command_name=command_name)
+                session.add(command_entry)
+                await session.commit()
+
+            # Update or insert the restriction
+            stmt = select(CommandRestriction).where(
+                CommandRestriction.command_id == command_entry.command_id,
+                CommandRestriction.restriction_type == restriction_type,
+                CommandRestriction.restriction_target == restriction_target
+            )
+            result = await session.execute(stmt)
+            restriction_entry = result.scalars().first()
+
+            if not restriction_entry:
+                restriction_entry = CommandRestriction(command_id=command_entry.command_id, restriction_type=restriction_type, restriction_target=restriction_target)
+                session.add(restriction_entry)
+                await session.commit()
+
+            # Update cache
+            guild_restrictions = self.bot.restricted_commands_cache.setdefault(ctx.guild.id, {})
+            command_restrictions = guild_restrictions.setdefault(command_name, {"channels": [], "roles": []})
+
+            if restriction_type == "channel":
+                if restriction_target not in command_restrictions["channels"]:
+                    command_restrictions["channels"].append(restriction_target)
+            elif restriction_type == "role":
+                if restriction_target not in command_restrictions["roles"]:
+                    command_restrictions["roles"].append(restriction_target)
+            
+            mention_string = f"<#{restriction_target}>" if restriction_type == "channel" else f"<@&{restriction_target}>"
+            await ctx.send(f"Restricted {command_name} to {'channel' if restriction_type == 'channel' else 'role'} {mention_string}")
+
 
     @commands.command(name="source")
     async def source(self, ctx: commands.Context):
@@ -146,6 +199,18 @@ class Config(commands.Cog):
         Displays the source code for the bot.
         """
         await ctx.send("[Github] - https://github.com/leonardomurakami/PenguinTunes")
+
+    @commands.command(name="debug")
+    async def debug(self, ctx: commands.Context):
+        """
+        Bot owner command to award a user with a specified amount of money.
+        """
+        restricted = await is_command_allowed("debug", self.bot, ctx)
+        if not restricted:
+            return
+        
+        if int(ctx.author.id) == int(config.bot_owner_id):
+            await ctx.send(repr(self.bot))
 
     @commands.command(name="award")
     async def award(self, ctx: commands.Context, member: discord.Member, amount: int):

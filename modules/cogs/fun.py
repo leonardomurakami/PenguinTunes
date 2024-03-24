@@ -33,7 +33,7 @@ from sqlalchemy import select
 from modules.globals import config
 from modules.orm.database import Cassino
 from modules.views.fun import CassinoView
-from modules.utils._config_utils import allowed_on_channel
+from modules.utils._config_utils import is_command_allowed
 from modules.player.slots import SlotMachine
 
 
@@ -48,7 +48,7 @@ class Fun(commands.Cog):
         - ctx: The context of the command.
         - quote: A string representing the quote to be added to the image. If a Discord user is mentioned, their avatar is added to the image.
         """
-        restricted = await allowed_on_channel("sisyphus", self.bot, ctx)
+        restricted = await is_command_allowed("sisyphus", self.bot, ctx)
         if not restricted:
             return
         
@@ -85,7 +85,7 @@ class Fun(commands.Cog):
         Creates a cassino instance. All should be controlled by the view and buttons.
         - ctx: The context of the command.
         """
-        restricted = await allowed_on_channel("cassino", self.bot, ctx)
+        restricted = await is_command_allowed("cassino", self.bot, ctx)
         if not restricted:
             return
         
@@ -97,7 +97,7 @@ class Fun(commands.Cog):
         Sends the current jackpot.
         - ctx: The context of the command.
         """
-        restricted = await allowed_on_channel("jackpot", self.bot, ctx)
+        restricted = await is_command_allowed("jackpot", self.bot, ctx)
         if not restricted:
             return
         
@@ -111,7 +111,7 @@ class Fun(commands.Cog):
         Sends the player current money.
         - ctx: The context of the command.
         """
-        restricted = await allowed_on_channel("money", self.bot, ctx)
+        restricted = await is_command_allowed("money", self.bot, ctx)
         if not restricted:
             return
         
@@ -131,7 +131,7 @@ class Fun(commands.Cog):
         Gets 1000$ daily. Command can only be ran once a day.
         - ctx: The context of the command.
         """
-        restricted = await allowed_on_channel("daily", self.bot, ctx)
+        restricted = await is_command_allowed("daily", self.bot, ctx)
         if not restricted:
             return
         
@@ -167,7 +167,7 @@ class Fun(commands.Cog):
         Sends the leaderboard.
         - ctx: The context of the command.
         """
-        restricted = await allowed_on_channel("top", self.bot, ctx)
+        restricted = await is_command_allowed("top", self.bot, ctx)
         if not restricted:
             return
         
@@ -185,7 +185,7 @@ class Fun(commands.Cog):
         Sends the player stats.
         - ctx: The context of the command.
         """
-        restricted = await allowed_on_channel("stats", self.bot, ctx)
+        restricted = await is_command_allowed("stats", self.bot, ctx)
         if not restricted:
             return
         

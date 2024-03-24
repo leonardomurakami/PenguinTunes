@@ -35,7 +35,7 @@ Each section represents a specific aspect of the bot's functionality and setting
    - av_emoji: Emojis used for player buttons, each with a specific function (`Section`).
 """
 import os
-from modules.utils._config_utils import Struct as Section
+from modules.utils._constants_utils import Struct as Section
 
 # configs
 

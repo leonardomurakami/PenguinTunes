@@ -40,100 +40,77 @@ Class Methods:
 """
 
 
-from sqlalchemy import select
-
-from modules.orm.database import RestrictedCommands
 from discord.ext import commands
+from sqlalchemy import select, insert
+from sqlalchemy.exc import IntegrityError
+
+from modules.utils._database_utils import get_session
+from modules.orm.database import Command, CommandRestriction
 
 
-class Struct(object):
-    def __init__(self, *args):
-        """
-        Constructor for the Struct class.
-        - Initializes the Struct with a header if provided.
-        Parameters:
-            - *args: Variable length argument list, the first argument is used as the header.
-        """
-        self.__header__ = str(args[0]) if args else None
+from sqlalchemy.future import select
+from discord.ext import commands
+from sqlalchemy.exc import IntegrityError
 
-    def __repr__(self):
-        """
-        Representation method for the Struct.
-        - Returns a string representation of the Struct.
-        - If a header is set, it returns the header; otherwise, it returns the default object
-            representation.
-        """
-        if self.__header__ is None:
-            return super(Struct, self).__repr__()
-        return self.__header__
+from sqlalchemy.future import select
+from discord.ext import commands
+from sqlalchemy.exc import IntegrityError
 
-    def next(self):
-        """
-        Fake iteration functionality.
-        - Raises StopIteration to simulate the behavior of an iterator.
-        - This method is a placeholder and does not provide actual iteration functionality.
-        """
-        raise StopIteration
+async def is_command_allowed(command_name: str, bot: commands.Bot, ctx: commands.Context):
+    guild_id = ctx.guild.id
+    channel_id = ctx.channel.id
+    user_roles = [role.id for role in ctx.author.roles]
+    
+    command_restrictions = bot.restricted_commands_cache.get(guild_id, {}).get(command_name, None)
 
-    def __iter__(self):
-        """
-        Custom iterator for the Struct.
-        - Iterates over the attributes of the Struct instance.
-        - Skips magic attributes (those starting with '__') and attributes that are instances of Struct.
-        Yields:
-            - Yields the values of the non-magic, non-Struct attributes of the instance.
-        """
-        ks = self.__dict__.keys()
-        for k in ks:
-            if not k.startswith("__") and not isinstance(k, Struct):
-                yield getattr(self, k)
+    if command_restrictions:
+        channels = command_restrictions.get('channels', [])
+        roles = command_restrictions.get('roles', [])
 
-    def __len__(self):
-        """
-        Length method for the Struct.
-        - Calculates the number of non-magic, non-Struct attributes in the Struct.
-        Returns:
-            - (int): The number of relevant attributes in the Struct instance.
-        """
-        ks = self.__dict__.keys()
-        return len(
-            [k for k in ks if not k.startswith("__") and not isinstance(k, Struct)]
-        )
-
-
-async def allowed_on_channel(command: str, bot: commands.Bot, ctx: commands.Context):
-    """
-    Check if command can be run in this channel. First checking if command is in bot.restricted_commands_cache, if not, then checking database.
-    """
-    if ctx.channel.guild.id in bot.restricted_commands_cache.keys():
-        if command in bot.restricted_commands_cache[ctx.channel.guild.id].keys():
-            if (
-                bot.restricted_commands_cache[ctx.channel.guild.id][command] == ctx.channel.id or 
-                not bot.restricted_commands_cache[ctx.channel.guild.id][command]
-            ):
-                return True
-            else:
-                await ctx.send(f"This command is restricted to <#{bot.restricted_commands_cache[ctx.channel.guild.id][command]}> in this guild.", ephemeral=True, delete_after=10)
-                await ctx.message.delete(delay=10)
-                return False
     else:
-        bot.restricted_commands_cache[ctx.channel.guild.id] = {}
-            
-    async with bot.session as session:
-        result = await session.execute(
-            select(RestrictedCommands).where(
-                RestrictedCommands.command_id == f"{str(ctx.channel.guild.id)}_{command}"
+        async with get_session() as session:
+            # Query to find or insert the command in the database
+            stmt = select(Command).where(
+                Command.guild_id == ctx.guild.id,
+                Command.command_name == command_name
             )
-        )
-        command = result.scalars().first()
-        if not command:
-            bot.restricted_commands_cache[ctx.channel.guild.id][command] = None
-            return True
-        else:
-            bot.restricted_commands_cache[ctx.channel.guild.id][command] = command.channel
-            if command.channel == ctx.channel.id:
-                return True
-            else:
-                await ctx.send(f"This command is restricted to <#{bot.restricted_commands_cache[ctx.channel.guild.id][command]}> in this guild.", ephemeral=True, delete_after=10)
-                await ctx.message.delete(delay=10)
-                return False
+            result = await session.execute(stmt)
+            command = result.scalars().first()
+
+            if not command:
+                new_command = Command(guild_id=ctx.guild.id, command_name=command_name)
+                session.add(new_command)
+                await session.commit()
+                command = new_command
+
+            stmt = select(CommandRestriction).where(
+                CommandRestriction.command_id == command.command_id
+            )
+
+            restrictions = await session.execute(stmt)
+            restrictions = restrictions.scalars().all()
+
+            channels, roles = [], []
+            for restriction in restrictions:
+                if restriction.restriction_type == 'channel':
+                    channels.append(restriction.restriction_target)
+                elif restriction.restriction_type == 'role':
+                    roles.append(restriction.restriction_target)
+                    
+            if guild_id not in bot.restricted_commands_cache:
+                bot.restricted_commands_cache[guild_id] = {}
+
+            bot.restricted_commands_cache[guild_id][command_name] = {'channels': channels, 'roles': roles}
+
+    channel_allowed = channel_id in channels if channels else True
+    role_allowed = any(role_id in roles for role_id in user_roles) if roles else True    
+
+    if channel_allowed and role_allowed:
+        return True
+    else:
+        await ctx.send(f"You're not allowed to use this command {'here' if not channel_allowed else 'due to lack of permissions'}.", delete_after=10)
+        try:
+            await ctx.message.delete(delay=10)
+        except Exception:
+            pass
+        return False
