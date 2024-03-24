@@ -101,6 +101,10 @@ class Config(commands.Cog):
         """
         Sets a custom nickname for someone else in the server
         """
+        restricted = await is_command_allowed("change-nickname", self.bot, ctx)
+        if not restricted:
+            return
+        
         if mention_list := ctx.message.mentions:
             member = mention_list[0]
             new_nick = re.sub(r"<[^>]+>", "", new_nickname).strip()
@@ -191,6 +195,80 @@ class Config(commands.Cog):
             
             mention_string = f"<#{restriction_target}>" if restriction_type == "channel" else f"<@&{restriction_target}>"
             await ctx.send(f"Restricted {command_name} to {'channel' if restriction_type == 'channel' else 'role'} {mention_string}")
+
+    @commands.hybrid_command(name="unrestrict", aliases=["unrestrict-command"])
+    @commands.has_permissions(manage_messages=True)
+    async def unrestrict(self, ctx: commands.Context, *, params: str):
+        """
+        Removes restrictions from a command within the guild.
+
+        Parameters:
+        - command_name: Name of the command to unrestrict.
+        - restriction_type: Type of restriction being removed ('channel' or 'role').
+        - restriction_target: ID of the channel or role from which to remove the restriction.
+        """
+        parts = params.split(maxsplit=2)
+        if len(parts) < 2:
+            await ctx.send("Please specify both the command name and the restriction type ('channel' or 'role').")
+            return
+
+        command_name, restriction_type = parts[0], parts[1]
+        channel_mentions = ctx.message.channel_mentions
+        role_mentions = ctx.message.role_mentions
+
+        if restriction_type not in ["channel", "role"]:
+            await ctx.send("Invalid restriction type. Please use 'channel' or 'role'.")
+            return
+
+        if restriction_type == "channel":
+            if not channel_mentions:
+                await ctx.send("Please mention a channel to remove the restriction from.")
+                return
+            restriction_target = channel_mentions[0].id
+
+        if restriction_type == "role":
+            if not role_mentions:
+                await ctx.send("Please mention a role to remove the restriction from.")
+                return
+            restriction_target = role_mentions[0].id
+
+        async with get_session() as session:
+            # Find the command in the Commands table
+            stmt = select(Command).where(Command.guild_id == ctx.guild.id, Command.command_name == command_name)
+            result = await session.execute(stmt)
+            command_entry = result.scalars().first()
+
+            if command_entry:
+                # Find and delete the restriction
+                stmt = select(CommandRestriction).where(
+                    CommandRestriction.command_id == command_entry.command_id,
+                    CommandRestriction.restriction_type == restriction_type,
+                    CommandRestriction.restriction_target == restriction_target
+                )
+                result = await session.execute(stmt)
+                restriction_entry = result.scalars().first()
+
+                if restriction_entry:
+                    await session.delete(restriction_entry)
+                    await session.commit()
+                    await ctx.send(f"Removed restriction from {command_name}.")
+                else:
+                    await ctx.send(f"No {restriction_type} restriction found for {command_name}.")
+
+                # Update cache
+                if ctx.guild.id in self.bot.restricted_commands_cache:
+                    guild_restrictions = self.bot.restricted_commands_cache[ctx.guild.id]
+                    if command_name in guild_restrictions:
+                        if restriction_type == "channel" and restriction_target in guild_restrictions[command_name]["channels"]:
+                            guild_restrictions[command_name]["channels"].remove(restriction_target)
+                        elif restriction_type == "role" and restriction_target in guild_restrictions[command_name]["roles"]:
+                            guild_restrictions[command_name]["roles"].remove(restriction_target)
+
+                        if not guild_restrictions[command_name]["channels"] and not guild_restrictions[command_name]["roles"]:
+                            # If there are no more restrictions, remove the command from the cache
+                            del guild_restrictions[command_name]
+            else:
+                await ctx.send(f"Command {command_name} not found.")
 
 
     @commands.command(name="source")
