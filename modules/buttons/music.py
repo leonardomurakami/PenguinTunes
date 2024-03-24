@@ -5,7 +5,7 @@ The MusicButton class is a subclass of `discord.ui.Button` that provides interac
 
 Class Methods:
 
-1. __init__(self, player: wavelink.Player, label: str, action: str, row: int | None = None, style: discord.ButtonStyle | None = discord.ButtonStyle.secondary)
+1. __init__(self, player: wavelink.Player, label: str, action: str, row: int = None, style: discord.ButtonStyle = discord.ButtonStyle.secondary)
    Initializes the MusicButton with specific properties.
    - player: The `wavelink.Player` instance associated with the button.
    - label: The text label displayed on the button.
@@ -67,8 +67,8 @@ class MusicButton(discord.ui.Button):
         player: wavelink.Player,
         label: str,
         action: str,
-        row: int | None = None,
-        style: discord.ButtonStyle | None = discord.ButtonStyle.secondary,
+        row: int = None,
+        style: discord.ButtonStyle = discord.ButtonStyle.secondary,
     ):
         """
         Initializes the MusicButton with specific properties.
@@ -85,6 +85,9 @@ class MusicButton(discord.ui.Button):
             label=self.initial_label(action, label),
             row=row,
         )
+
+    def get_disabled(self):
+        return self.disabled
 
     async def callback(self, interaction: discord.Interaction):
         """
