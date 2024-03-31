@@ -189,7 +189,7 @@ class Music(commands.Cog):
             )
         else:
             tracks: wavelink.Search = await wavelink.Playable.search(
-                query.split(":", 1)[1], source="spsearch:"
+                query, source="spsearch:"
             )
         if not tracks:
             await ctx.send(
