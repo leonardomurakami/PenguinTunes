@@ -183,7 +183,7 @@ class Music(commands.Cog):
             tracks: wavelink.Search = await wavelink.Playable.search(
                 query.split(":", 1)[1], source="speak:"
             )
-        elif query.startswith("ytsearch:") or query.startswith("yt:")
+        elif query.startswith("ytsearch:") or query.startswith("yt:"):
             tracks: wavelink.Search = await wavelink.Playable.search(
                 query.split(":", 1)[1], source="spsearch:"
             )
