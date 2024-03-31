@@ -185,10 +185,12 @@ class Music(commands.Cog):
             )
         elif query.startswith("ytsearch:") or query.startswith("yt:"):
             tracks: wavelink.Search = await wavelink.Playable.search(
-                query.split(":", 1)[1], source="spsearch:"
+                query.split(":", 1)[1], source="ytsearch:"
             )
         else:
-            tracks: wavelink.Search = await wavelink.Playable.search(query)
+            tracks: wavelink.Search = await wavelink.Playable.search(
+                query.split(":", 1)[1], source="spsearch:"
+            )
         if not tracks:
             await ctx.send(
                 f"{ctx.author.mention} - Could not find any tracks with that query. Please try again."
