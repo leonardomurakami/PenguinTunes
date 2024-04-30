@@ -25,7 +25,7 @@ plugins:
       - "ytsearch:%QUERY%" # Will be used if track has no ISRC or no track could be found for the ISRC
     sources:
       spotify: true # Enable Spotify source
-      youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
+      youtube: false
     spotify:
       clientId: "${SPOTIFY_CLIENT_ID}"
       clientSecret: "${SPOTIFY_CLIENT_SECRET}"
@@ -37,7 +37,7 @@ lavalink:
     - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.0.1"
     - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0"
     - dependency: "com.dunctebot:skybot-lavalink-plugin:1.6.3"
-    - dependency: "com.github.lavalink-devs.lavaplayer-youtube-source:plugin:1.0.5"
+    - dependency: "com.github.lavalink-devs.lavaplayer-youtube-source:plugin:1.0.6"
       repository: "https://jitpack.io"
   pluginsDir: "/opt/Lavalink/plugins/"
   defaultPluginRepository: "https://maven.lavalink.dev/releases"
