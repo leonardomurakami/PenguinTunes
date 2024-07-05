@@ -309,4 +309,27 @@ class Config(commands.Cog):
             await ctx.send(f"🏆 {member.mention} has been awarded ${amount} for finding a bug! New balance: ${player.balance}")
         else:
             await ctx.send("You must be the owner to use this command!")
+
+     @commands.hybrid_command(name="role")
+     @commands.has_permissions(manage_roles=True)
+     async def add_role(self, ctx: commands.Context, member: discord.Member, role: discord.Role):
+         """
+         Adds a specified role to a user within the server, bot owner only.
+     
+         Parameters:
+         - user: The user who should receive the role.
+         - role: The role to be given to the user.
+         """
+         restricted = await is_command_allowed("role", self.bot, ctx)
+         if not restricted:
+             return
+   
+         if role in member.roles:
+             await ctx.send(f"{member.mention} already has the {role.mention} role.")
+         elif int(ctx.author.id) == int(config.bot_owner_id)::
+             try:
+                 await member.add_roles(role)
+                 await ctx.send(f"{role.mention} role added to {member.mention}.")
+             except discord.errors.Forbidden:
+                 await ctx.send("I don't have permission to manage roles in this server.")
         
