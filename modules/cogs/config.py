@@ -310,26 +310,45 @@ class Config(commands.Cog):
         else:
             await ctx.send("You must be the owner to use this command!")
 
-    @commands.hybrid_command(name="role")
+    @commands.command(name="role")
     @commands.has_permissions(manage_roles=True)
-    async def add_role(self, ctx: commands.Context, member: discord.Member, role: discord.Role):
+    async def add_role(self, ctx: commands.Context, member_id: int, role_id: int):
         """
         Adds a specified role to a user within the server, bot owner only.
-    
+
         Parameters:
-        - user: The user who should receive the role.
-        - role: The role to be given to the user.
+        - member_id: The ID of the user who should receive the role.
+        - role_id: The ID of the role to be given to the user.
         """
         restricted = await is_command_allowed("role", self.bot, ctx)
         if not restricted:
             return
 
-        if role in member.roles:
-            await ctx.send(f"{member.mention} already has the {role.mention} role.")
-        elif int(ctx.author.id) == int(config.bot_owner_id)::
-            try:
-                await member.add_roles(role)
-                await ctx.send(f"{role.mention} role added to {member.mention}.")
-            except discord.errors.Forbidden:
-                await ctx.send("I don't have permission to manage roles in this server.")
+        try:
+            member = await ctx.guild.fetch_member(member_id)  
+            role = ctx.guild.get_role(role_id)  
+
+            if role is None:
+                await ctx.send(f"Role with ID {role_id} not found.")
+                return
+
+            if member is None:
+                await ctx.send(f"Member with ID {member_id} not found.")
+                return
+
+            if role in member.roles:
+                await ctx.send(f"{member.mention} already has the {role.mention} role.")
+
+            elif int(ctx.author.id) == int(config.bot_owner_id):
+                try:
+                    await member.add_roles(role)
+                    await ctx.send(f"{role.mention} role added to {member.mention}.")
+                except discord.errors.Forbidden:
+                    await ctx.send("I don't have permission to manage roles in this server.")
+                    
+        except discord.NotFound:
+            await ctx.send("Member or role not found.")
+        except discord.HTTPException as e:
+            await ctx.send(f"An error occurred: {e}")
+
     
