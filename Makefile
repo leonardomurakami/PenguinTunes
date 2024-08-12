@@ -1,5 +1,8 @@
 .PHONY: docker-build docker-run docker-up
 
+run-tests: docker-build
+	docker run --entrypoint=python penguintunes:latest -m pytest
+
 docker-build:
 	docker build --build-arg TOKEN=$(DISCORD_TOKEN) -t penguintunes:latest .
 

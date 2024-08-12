@@ -8,8 +8,8 @@ class SlotButton(discord.ui.Button):
         self,
         label: str,
         action: ActionCommand,
-        row: int | None = None,
-        style: discord.ButtonStyle | None = discord.ButtonStyle.secondary,
+        row: int = None,
+        style: discord.ButtonStyle = discord.ButtonStyle.secondary,
     ):
         self.action = action
         super().__init__(

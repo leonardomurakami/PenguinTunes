@@ -5,7 +5,7 @@ The PlayerView class is a subclass of `discord.ui.View` that provides an interac
 
 Class Methods:
 
-1. __init__(self, *, player: wavelink.Player, timeout: float | None = 180)
+1. __init__(self, *, player: wavelink.Player, timeout: float = 180)
    Initializes the PlayerView with a specific music player and optional timeout.
    - player: The `wavelink.Player` instance associated with this view.
    - timeout: The duration in seconds after which the view becomes inactive. Defaults to 180 seconds.
@@ -40,9 +40,13 @@ from modules.globals import config
 
 
 class PlayerView(discord.ui.View):
-    def __init__(self, *, player: wavelink.Player, timeout: float | None = 180):
-        super().__init__(timeout=timeout)
+    def __init__(self, *, player: wavelink.Player, timeout: float = 180):
+        if player is None:
+            raise ValueError("Player cannot be None")
+        if timeout < 0:
+             raise ValueError("Timeout cannot be negative")
 
+        super().__init__(timeout=timeout)
         self.player = player
         self.add_item(
             MusicButton(
@@ -87,8 +91,9 @@ class PlayerView(discord.ui.View):
         await self.message.edit(view=self)
 
     async def on_timeout(self) -> None:
-        await self.disable_all_items()
         try:
-            self.destroy_view()
+            for item in self.children:
+                item.disable = True
+            await self.destroy_view()
         except Exception:
             pass

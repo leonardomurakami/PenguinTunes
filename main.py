@@ -142,10 +142,10 @@ class Bot(commands.Bot):
         Args:
             payload (wavelink.TrackStartEventPayload): Payload containing information about the track that started playing.
         """
-        player: wavelink.Player | None = payload.player
+        player: wavelink.Player = payload.player
         if not player:
             return
-        original: wavelink.Playable | None = payload.original
+        original: wavelink.Playable = payload.original
         track: wavelink.Playable = payload.track
         embed = create_track_embed(track, original)
         view = PlayerView(player=player, timeout=track.length)
@@ -161,7 +161,7 @@ class Bot(commands.Bot):
         Args:
             payload (wavelink.TrackEndEventPayload): Payload containing information about the track that has ended.
         """
-        player: wavelink.Player | None = payload.player
+        player: wavelink.Player = payload.player
         if not player:
             return
         if player.queue:
